@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "name": "渠道效果研究",
+  "data": {
+    "grain": "month-channel-status",
+    "date": "month"
+  },
+  "analysis": {
+    "group": "channel",
+    "frequency": "M",
+    "timezone": "Asia/Shanghai"
+  },
+  "metrics": {
+    "conversion": {
+      "label": "整体转化率",
+      "aggregation": "ratio",
+      "column": "orders",
+      "denominator": "visits",
+      "unit": "percent",
+      "filters": [
+        {
+          "column": "status",
+          "op": "eq",
+          "value": "valid"
+        }
+      ]
+    }
+  },
+  "quality": {
+    "required_columns": [
+      "month",
+      "channel",
+      "visits",
+      "orders",
+      "status"
+    ],
+    "unique_key": [
+      "month",
+      "channel",
+      "status"
+    ]
+  }
+}

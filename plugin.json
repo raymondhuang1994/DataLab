@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "data-lab",
+  "version": "0.2.0",
+  "description": "DataLab 数据科学工作台：数据分析、统计建模、图表、实时文件看板与 Word 报告。"
+}

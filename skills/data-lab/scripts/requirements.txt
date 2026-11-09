@@ -1,0 +1,9 @@
+# Required runtime; install into a project venv, not the host's system Python.
+pandas>=2.2,<3
+numpy>=1.26,<3
+matplotlib>=3.8,<4
+openpyxl>=3.1,<4
+python-docx>=1.1,<2
+scipy>=1.12,<2
+scikit-learn>=1.4,<2
+tzdata>=2024.1

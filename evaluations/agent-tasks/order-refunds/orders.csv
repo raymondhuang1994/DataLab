@@ -1,0 +1,5 @@
+﻿order_id,region,amount,status
+o1,North,100,paid
+o2,North,200,paid
+o3,South,300,cancelled
+o4,South,400,paid

@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "report": {"title": "月度经营分析", "page_size": "A4", "cjk_font": null},
+  "charts": {"color": "#286B85"},
+  "display": {"precision": 2, "missing_label": "未定义"},
+  "dashboard": {"interval": 5, "max_rows": 50000}
+}

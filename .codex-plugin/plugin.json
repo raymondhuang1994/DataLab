@@ -1,0 +1,6 @@
+{
+  "name": "data-lab",
+  "version": "0.2.0",
+  "description": "DataLab 数据科学工作台：数据分析、建模、可视化、实时文件看板和 Word 报告。",
+  "skills": "./skills/"
+}

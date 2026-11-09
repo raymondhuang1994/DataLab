@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datalab-skill-runtime"
+version = "0.2.0"
+description = "Portable execution helpers for the DataLab agent skill"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+dependencies = [
+  "pandas>=2.2,<3", "numpy>=1.26,<3", "matplotlib>=3.8,<4",
+  "openpyxl>=3.1,<4", "python-docx>=1.1,<2",
+  "scipy>=1.12,<2", "scikit-learn>=1.4,<2", "tzdata>=2024.1"
+]
+
+[project.optional-dependencies]
+parquet = ["pyarrow>=16"]
+interactive = ["plotly>=5.22,<7"]
+dev = ["pytest>=8,<10", "PyYAML>=6,<7"]
+
+[project.scripts]
+datalab = "datalab.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "skills/data-lab/scripts"}
+
+[tool.setuptools.packages.find]
+where = ["skills/data-lab/scripts"]
+include = ["datalab*"]
+
+[tool.setuptools.package-data]
+datalab = ["assets/*.html", "assets/*.js"]
+
+[tool.pytest.ini_options]
+pythonpath = ["skills/data-lab/scripts"]
+testpaths = ["tests"]

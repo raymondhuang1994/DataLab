@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "name": "合成销售数据经营分析",
+  "data": {
+    "grain": ["date", "region", "product"],
+    "entity_key": ["date", "region", "product"],
+    "date": "date",
+    "sheet": null
+  },
+  "analysis": {"timezone": "Asia/Shanghai", "frequency": "M", "group": "region"},
+  "metrics": {
+    "revenue": {
+      "label": "销售收入", "aggregation": "sum", "column": "revenue",
+      "unit": "currency", "currency": "CNY", "precision": 2
+    },
+    "gross_margin": {
+      "label": "整体毛利率", "aggregation": "ratio", "column": "gross_profit",
+      "denominator": "revenue", "unit": "percent", "precision": 1
+    },
+    "average_order_value": {
+      "label": "平均每单收入", "aggregation": "ratio", "column": "revenue",
+      "denominator": "orders", "filters": [{"column": "orders", "op": "gt", "value": 0}],
+      "unit": "currency", "currency": "CNY", "precision": 2
+    },
+    "region_count": {
+      "label": "覆盖地区数", "aggregation": "count_distinct", "column": "region",
+      "unit": "number", "precision": 0
+    }
+  },
+  "quality": {
+    "required_columns": ["date", "region", "product", "revenue", "orders", "gross_profit"],
+    "unique_key": ["date", "region", "product"],
+    "max_missing_fraction": {"revenue": 0, "orders": 0, "gross_profit": 0},
+    "min_rows": 1
+  }
+}

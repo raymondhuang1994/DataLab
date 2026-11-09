@@ -1,0 +1,4 @@
+interface:
+  display_name: "DataLab｜数据科学工作台"
+  short_description: "分析数据、评估模型、制作图表和实时看板，交付可验证的中文 Word 报告"
+  default_prompt: "使用 $data-lab 分析我提供的数据，检查质量，生成有依据的图表、结论和所需报告。"

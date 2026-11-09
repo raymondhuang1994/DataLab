@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "display": {
+    "precision": 1
+  },
+  "report": {
+    "title": "渠道转化效果分析",
+    "page_size": "A4"
+  },
+  "charts": {
+    "color": "#286B85"
+  }
+}

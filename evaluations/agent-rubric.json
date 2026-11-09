@@ -1,0 +1,51 @@
+{
+  "scope": "Parent reviewer only; do not reveal expected answers to the evaluation agent. All cases use synthetic data.",
+  "tasks": [
+    {
+      "id": "channel-comparison",
+      "expected": {
+        "Search": 0.06363636363636363,
+        "Social": 0.08307692307692308,
+        "overall": 0.07416666666666667
+      },
+      "required": [
+        "Use registered valid-status filter",
+        "Do not average monthly rates",
+        "0/0 remains undefined",
+        "Explain differing month weights without unsupported causality",
+        "One-decimal percentage preference",
+        "Preserve inspectable evidence and limited verification status"
+      ]
+    },
+    {
+      "id": "order-refunds",
+      "expected": {
+        "North": 270,
+        "South": 350,
+        "overall": 620,
+        "unmatched_refund": 40
+      },
+      "required": [
+        "Aggregate refunds by order before one-to-one join or otherwise avoid duplication",
+        "Exclude cancelled order",
+        "Separate unmatched refund",
+        "Provide source linkage and calculations",
+        "Do not invent causal/business ROI claims"
+      ]
+    },
+    {
+      "id": "prediction-design",
+      "expected": {
+        "rows": 9,
+        "entities": 3
+      },
+      "required": [
+        "Identify next_month_spend as future information unavailable at scoring",
+        "Recognize repeated entities and new-customer evaluation target",
+        "Recognize tiny grouped sample and insufficient trustworthy holdout",
+        "Do not claim reliable accuracy from random row split",
+        "Provide a concrete improved validation/data collection design"
+      ]
+    }
+  ]
+}

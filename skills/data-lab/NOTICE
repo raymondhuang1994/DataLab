@@ -1,0 +1,14 @@
+DataLab
+
+Workflow instructions are adapted from Anthropic's Data Analyst Plugin:
+https://github.com/anthropics/knowledge-work-plugins/tree/main/data
+Upstream commit: e050c2ec856373787143d7057663a6ebd1277df3
+Retrieved: 2026-11-08
+Upstream license: Apache License, Version 2.0 (see LICENSE)
+
+DataLab changes: provider-neutral workflows, a consolidated data-lab entry skill,
+Chinese reporting guidance, cross-platform Python execution helpers, tested
+supervised modeling/forecasting, local file-refresh dashboards, editable Word
+reports and artifact verification. This is an independent adaptation, not an
+official Anthropic or OpenAI product. Upstream approvals and installation state
+do not transfer to this package.

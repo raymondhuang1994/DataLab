@@ -1,0 +1,58 @@
+# DataLab｜数据科学工作台 · v0.2
+
+[GitHub 仓库](https://github.com/raymondhuang1994/DataLab) · [下载发行包](https://github.com/raymondhuang1994/DataLab/releases) · [跨平台测试](https://github.com/raymondhuang1994/DataLab/actions)
+
+面向 ChatGPT / Codex 的可移植数据分析技能，支持 Windows / macOS。基于 Anthropic Data Analyst Plugin 的分析方法改造，增加可执行的建模、刷新看板、中文 Word 和结果验证工具。
+
+## 已实现
+
+- **分析**：CSV/TSV/XLSX/JSON/Parquet 数据画像、缺失与重复检查、明确口径的分组和时间汇总、加权平均与合计比例。
+- **统计**：两个独立组的 Welch / Mann–Whitney 比较，效应估计及适用限制；其他方法由 Skill 指导编写和验证代码。
+- **建模**：回归、二分类/多分类，基线及线性/随机森林候选，训练内部交叉验证、留出集评估；规则单变量序列回测和未来预测。
+- **图表**：PNG/SVG 静态图、独立 HTML 报告；交互看板含指标、趋势、分类比较、筛选与明细表。
+- **实时文件看板**：本地服务器轮询指定数据文件，显示更新时间、错误/过期状态；源文件恢复后自动恢复。
+- **Word**：原生可编辑正文和表格、跨页表头、宽表横页、页码、保持图片比例。
+- **复现与验证**：输入指纹、计算表、配置、模型重跑脚本及自动检查记录。
+- **统一指标**：比例、加权均值、行数、非空计数和去重人数使用共享定义；过滤后重新计算。实时看板全量计算，明细分页不改变指标覆盖范围。
+- **项目与偏好**：显式 JSON 保存业务口径、数据质量规则、时区，以及展示精度、颜色、Word 页面和字体。记录实际生效值、字段来源与配置指纹。
+- **分层验证**：独立复算支持的总体/分组/周期指标，核对结构化数字声明；计算检查与业务文字/版式审阅分别记录。
+
+原有工作流保留为主 Skill 的按需参考资料，避免必须一次加载所有说明。一个 `data-lab` 入口负责识别用户目标，执行工具是辅助，不替代模型对问题和证据的判断。
+
+原有能力和此次新增功能的对应关系见 [功能来源与范围](docs/FEATURES.md)。
+
+## 开始使用
+
+请先阅读 [安装与兼容说明](docs/INSTALL.md)。安装后可直接说：
+
+> 使用 DataLab 分析这份 Excel，先检查数据质量，再按地区和月份比较收入，生成图表和中文 Word 报告，保留计算依据。
+
+> 使用 DataLab 对流失数据做分类预测，比较基线与候选模型，使用留出集评估，并解释限制。
+
+> 使用 DataLab 为这个持续更新的 CSV 建立每 5 秒刷新的本地看板。
+
+无插件运行环境时，也可以直接运行 `skills/data-lab/scripts/run.py --help`。`examples/` 提供明确标注为合成数据的样例。
+
+## 范围与边界
+
+这是分析技能和执行助手，不是托管 BI 服务。实时看板从本地文件读取变化，没有预装数据库凭证或无人值守数据采集。复杂因果推断、任意机器学习模型、实时流处理并非内置功能。模型结果不保证优于基线。
+
+不含 PPT 导出和跨设备同步。Word 导出与视觉审阅分开记录。数据来源、模型假设和业务因果仍需要判断；自动验证通过只代表所列检查通过。
+
+## 开发和测试
+
+```text
+python -m pip install -e ".[dev,parquet,interactive]"
+python -m pytest -q
+python evaluations/run_benchmarks.py --out ../work/benchmark-run
+python tools/check_package.py
+python tools/package.py --out ../outputs
+```
+
+提供 GitHub Actions Windows/macOS 测试矩阵。当前实际执行结果见 [验证记录](docs/VALIDATION.md)，未运行的平台不会标记为通过。
+
+`evaluations/` 包含28个业务场景的计算与验证任务，以及3份独立代理任务包。数据均为合成数据。自动任务评分与代理实际分析能力分开记录，不以单元测试数量代替专业分析质量。
+
+## 来源
+
+Apache-2.0；上游来源、版本和改动说明见 [NOTICE](NOTICE) 和 [LICENSE](LICENSE)。本项目是独立改造，不代表 Anthropic 或 OpenAI 官方产品。

@@ -1,0 +1,8 @@
+﻿month,channel,visits,orders,status
+2025-01,Search,1000,50,valid
+2025-01,Social,100,10,valid
+2025-02,Search,100,20,valid
+2025-02,Social,1000,80,valid
+2025-03,Search,0,0,valid
+2025-03,Social,200,18,valid
+2025-03,Search,1000,900,cancelled

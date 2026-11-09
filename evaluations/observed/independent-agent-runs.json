@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-08",
+  "runtime": "macOS arm64 / Python 3.12.14",
+  "synthetic_data": true,
+  "protocol": "Three fresh agents received only their request/data and Skill, without expected answers; parent reviewed outcomes against the private rubric. Agents did not edit runtime source.",
+  "assessment_scope": "Task-level observed runs, not a universal success rate or Windows/client certification.",
+  "tasks": [
+    {
+      "id": "channel-comparison",
+      "result": "met_requested_scope",
+      "observed": {
+        "Search": {
+          "orders": 70,
+          "visits": 1100,
+          "rate": 0.06363636363636363
+        },
+        "Social": {
+          "orders": 108,
+          "visits": 1300,
+          "rate": 0.08307692307692308
+        },
+        "overall": {
+          "orders": 178,
+          "visits": 2400,
+          "rate": 0.07416666666666667
+        },
+        "gap_percentage_points": 1.9440559440559446,
+        "source_rows": 7,
+        "status_eligible_rows": 6,
+        "missing_cells": 0,
+        "zero_denominator_rows": 1
+      },
+      "evidence": "Agent report, original CSV, numeric tables, 22 claims and 16 independent checks",
+      "extra_work": "Task-specific cross-tabulation, weights, sensitivity and chart code; not all were built-in commands.",
+      "issues_found_and_repaired": [
+        "Sentence-level claims inside paragraphs were incorrectly rejected; validator fixed and retested.",
+        "Shell-only reproduction replaced with an actually run portable Python entry point."
+      ],
+      "limits": [
+        "PNG visuals inspected; complete HTML browser layout not inspected",
+        "Semantic review remains separate from automatic checks"
+      ]
+    },
+    {
+      "id": "order-refunds",
+      "result": "met_requested_scope",
+      "observed": {
+        "North": 270,
+        "South": 350,
+        "overall": 620,
+        "unmatched_refund": 40,
+        "naive_join_overstatement": 100
+      },
+      "method": "Refunds aggregated per order before one-to-one joining paid orders; independent csv/Decimal recomputation of original sources.",
+      "limits": [
+        "Extra task code performs the join; generic validator alone checks the derived table",
+        "No browser visual inspection"
+      ]
+    },
+    {
+      "id": "prediction-design",
+      "result": "met_requested_scope",
+      "observed": {
+        "rows": 9,
+        "customers": 3,
+        "future_feature_matches": 9,
+        "unseen_holdout_customers": 0,
+        "trained": false
+      },
+      "assessment": "Correctly identified future feature and entity leakage and insufficient sample; did not produce misleading model accuracy.",
+      "limits": [
+        "No new grouped-split modeling API implemented in this release",
+        "Business churn semantics not inferred solely from the synthetic sample"
+      ]
+    }
+  ]
+}

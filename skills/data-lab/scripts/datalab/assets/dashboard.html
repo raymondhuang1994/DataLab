@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-__SCRIPT_NONCE__'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>__PAGE_TITLE__ · DataLab</title>
+<style>
+:root{color-scheme:light;--paper:#fff;--ink:#183742;--muted:#526c77;--wash:#eff5f6;--rule:#ccdce1;--brand:#006d77;--bad:#b32032;--warn:#805000;font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.5}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}main{max-width:1320px;margin:auto;padding:28px 32px 40px}h1,h2,p{margin:0}h1{font-size:28px;font-weight:650;line-height:1.25;overflow-wrap:anywhere}h2{font-size:18px;font-weight:600}.masthead{display:flex;align-items:start;justify-content:space-between;gap:20px;padding-bottom:24px}.brand{font-weight:650;color:var(--brand);padding-top:3px;white-space:nowrap}.source-line{margin-top:8px;color:var(--muted);overflow-wrap:anywhere}.status{display:flex;align-items:center;flex-wrap:wrap;gap:10px 22px;background:var(--wash);padding:12px 16px;margin-bottom:20px;font-size:13px}.mode{font-weight:650;color:var(--brand)}.times{color:var(--muted);font-variant-numeric:tabular-nums}.banner{padding:12px 16px;background:#fff4dc;color:var(--warn);margin-bottom:16px;overflow-wrap:anywhere}.banner.error{background:#fff0f1;color:var(--bad)}[hidden]{display:none!important}.controls{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:12px;margin-bottom:12px}label{display:grid;gap:5px;font-size:13px;color:var(--muted)}select,input,button{font:inherit;color:var(--ink);background:var(--paper);border:1px solid #a5bac3;border-radius:5px;min-height:38px;padding:7px 9px;max-width:100%;min-width:0}select,input{width:100%}button{cursor:pointer;font-size:13px;padding-inline:12px}button:hover{background:var(--wash)}button:disabled{opacity:.5;cursor:default}:focus-visible{outline:3px solid #6abac3;outline-offset:3px}.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px}.method{font-size:13px;color:var(--muted)}.metrics{display:grid;grid-template-columns:2fr 1fr 1fr;padding:16px 0 22px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);gap:24px}.metric-label{color:var(--muted);font-size:13px}.metric-value{font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.4}.charts{display:grid;grid-template-columns:1.35fr 1fr;gap:32px;margin-top:26px}.chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}.chart-note{font-size:12px;color:var(--muted);margin-top:5px;min-height:18px}.chart{min-width:0}.chart svg{display:block;overflow:visible}.empty{display:grid;place-items:center;min-height:180px;color:var(--muted);font-size:14px}.table-section{margin-top:28px}.table-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px}.pagination{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}.table-wrap{overflow-x:auto;border-top:1px solid var(--rule)}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:10px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid #e0eaee;max-width:360px;overflow:hidden;text-overflow:ellipsis}th{font-weight:600;background:var(--wash)}td.number,th.number{text-align:right;font-variant-numeric:tabular-nums}tr:hover td{background:#f6fafa}details{margin-top:24px;font-size:12px;color:var(--muted)}summary{cursor:pointer}.trace{display:grid;grid-template-columns:max-content 1fr;gap:5px 14px;margin-top:10px;overflow-wrap:anywhere}.trace dt,.trace dd{margin:0}.trace dd{min-width:0}.chart-mark{cursor:pointer}.chart-mark:focus{outline:2px solid var(--brand)}@media(max-width:1000px){.controls{grid-template-columns:repeat(3,minmax(0,1fr))}.charts{grid-template-columns:1fr;gap:28px}}@media(max-width:600px){main{padding:20px 16px 28px}.masthead{gap:12px}h1{font-size:24px}.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{gap:16px;grid-template-columns:1fr 1fr}.metrics>div:first-child{grid-column:1/-1}.metric-value{font-size:26px}.status{align-items:start;flex-direction:column;gap:5px}.trace{grid-template-columns:1fr;gap:3px}.trace dd{margin-bottom:8px}button,select,input{min-height:44px;font-size:16px}.pagination button{font-size:14px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}@media print{main{max-width:none;padding:0}.controls,.actions,.pagination button,#refresh{display:none}.charts{grid-template-columns:1fr 1fr}.table-wrap{overflow:visible}th,td{white-space:normal}details{break-before:avoid}}
+</style>
+</head>
+<body>
+<main id="dashboard">
+  <header class="masthead"><div><h1 id="title"></h1><p class="source-line" id="source"></p></div><span class="brand">DataLab</span></header>
+  <div class="status" aria-live="polite"><span class="mode" id="mode"></span><span class="times" id="checked"></span><span class="times" id="changed"></span><button id="refresh" type="button">立即检查</button></div>
+  <div class="banner error" id="error" role="alert" hidden></div>
+  <div class="banner" id="truncated" hidden></div>
+  <section class="controls" aria-label="分析条件">
+    <label>指标<select id="metric"></select></label>
+    <label>汇总方式<select id="agg"><option value="sum">合计</option><option value="mean">平均值（未加权）</option><option value="median">中位数</option><option value="count_rows">行数</option><option value="count_nonmissing">非空值数量</option><option value="count_distinct">去重数量</option><option value="ratio">分子合计 / 分母合计</option><option value="weighted_mean">加权平均</option></select></label>
+    <label>分组字段<select id="group"></select></label>
+    <label>分组筛选<select id="category"></select></label>
+    <label>日期字段<select id="date"></select></label>
+    <label style="grid-column:span 2">日期范围<span style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;min-width:0"><input id="start" type="date" aria-label="起始日期"><input id="end" type="date" aria-label="结束日期"></span></label>
+  </section>
+  <div class="actions"><button id="reset" type="button">重置筛选</button><span class="method" id="method"></span></div>
+  <section class="metrics" aria-label="当前筛选结果" aria-live="polite">
+    <div><div class="metric-label" id="metric-label"></div><div class="metric-value" id="metric-value"></div></div>
+    <div><div class="metric-label">筛选后数据行</div><div class="metric-value" id="row-count"></div></div>
+    <div><div class="metric-label">指标缺失或无效</div><div class="metric-value" id="missing-count"></div></div>
+  </section>
+  <section class="charts" aria-label="联动图表">
+    <div class="chart"><div class="chart-head"><h2>日期趋势</h2><span class="method" id="trend-unit"></span></div><p class="chart-note" id="trend-note"></p><div id="trend"></div></div>
+    <div class="chart"><div class="chart-head"><h2>分组比较</h2><span class="method" id="group-unit"></span></div><p class="chart-note" id="group-note"></p><div id="bars"></div></div>
+  </section>
+  <section class="table-section"><div class="table-toolbar"><h2>筛选后的明细</h2><div class="pagination"><span id="page-info"></span><button id="previous" type="button">上一页</button><button id="next" type="button">下一页</button></div></div><div class="table-wrap"><table id="table"><thead></thead><tbody></tbody></table></div></section>
+  <details><summary>数据来源与刷新记录</summary><dl class="trace" id="trace"></dl></details>
+</main>
+<script id="bootstrap" type="application/json" nonce="__SCRIPT_NONCE__">__BOOTSTRAP_JSON__</script>
+<script nonce="__SCRIPT_NONCE__">
+__METRICS_JS__
+(() => {
+  'use strict';
+  const bootstrap = JSON.parse(document.getElementById('bootstrap').textContent);
+  let data = bootstrap.data;
+  const live = bootstrap.live;
+  const byId = id => document.getElementById(id);
+  const fields = ['metric','agg','group','category','date','start','end'];
+  const controls = Object.fromEntries(fields.map(key => [key, byId(key)]));
+  let state = {...data.defaults, category:'', start:'', end:'', page:0};
+  let filtered = [], networkError = '', busy = false, timer = null, querySequence = 0;
+  const number = new Intl.NumberFormat('zh-CN',{maximumSignificantDigits:8});
+  const short = new Intl.NumberFormat('zh-CN',{notation:'compact',maximumSignificantDigits:4});
+  const aggregationName = {sum:'合计',mean:'平均值（未加权）',median:'中位数',count_rows:'行数',count_nonmissing:'非空值数量',count_distinct:'去重数量',ratio:'分子合计 / 分母合计',weighted_mean:'加权平均'};
+  const metricSpec = () => data.metric_locked ? data.metric_definition : {...data.metric_definition,column:state.metric||null,label:state.metric||'记录数',aggregation:state.agg,filters:[]};
+  const displayValue = value => DataLabMetrics.formatValue(value,metricSpec(),data.preferences);
+  const sumStats = rows => DataLabMetrics.computeMetric(rows,metricSpec());
+  const text = value => value == null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value);
+  const numeric = value => typeof value === 'number' && Number.isFinite(value);
+  const categoryKey = value => value == null ? '__missing__' : JSON.stringify([typeof value,value]);
+  const categoryLabel = value => value == null ? '（缺失）' : text(value);
+  const dateKey = value => {
+    if(value==null||value===''||typeof value==='number')return '';
+    const raw=String(value),iso=raw.match(/^\d{4}-\d{2}-\d{2}$/);
+    const date=new Date(iso?raw+'T00:00:00Z':raw);
+    if(Number.isNaN(date.valueOf()))return '';
+    const key=date.toISOString().slice(0,10);
+    return iso&&key!==raw?'':key;
+  };
+  const rowIndex=new WeakMap(data.records.map((row,index)=>[row,index]));
+  const groupLabel=(row,column)=>data.group_labels?.[column]?.[rowIndex.get(row)]??categoryLabel(row[column]);
+  const dateFor=(row,column)=>data.date_keys?.[column]?.[rowIndex.get(row)]??dateKey(row[column]);
+  const periodFor=(row,column)=>data.period_keys?.[column]?.[rowIndex.get(row)]??dateFor(row,column);
+  const periodLabel=()=>({D:'日',W:'周',M:'月',Q:'季',Y:'年'}[data.frequency||'D']);
+  const chartColor=()=>data.preferences?.charts?.color||'#286B85';
+  const formatTime = value => value ? new Date(value).toLocaleString('zh-CN',{hour12:false}) : '尚无成功记录';
+  function option(select,value,label) { const item=document.createElement('option');item.value=value;item.textContent=label;select.append(item); }
+  function fill(select,items,value,emptyLabel) {
+    select.replaceChildren();
+    if(emptyLabel) option(select,'',emptyLabel);
+    items.forEach(item=>option(select,item.value ?? item.name,item.label ?? item.name));
+    select.value=value;
+  }
+  function configure(preserve=true) {
+    const columns=data.columns, names=columns.map(c=>c.name);
+    if(!preserve) state={...data.defaults,category:'',start:'',end:'',page:0};
+    ['metric','group','date'].forEach(key=>{if(state[key] && !names.includes(state[key]))state[key]=data.defaults[key]||'';});
+    if(data.metric_locked){state.metric=data.defaults.metric;state.agg=data.defaults.agg;}
+    fill(controls.metric,columns,state.metric,'按数据行计数');
+    controls.metric.disabled=Boolean(data.metric_locked);
+    const groupColumns=columns.filter(c=>c.groupable!==false);
+    if(state.group&&!groupColumns.some(c=>c.name===state.group))state.group=data.defaults.group||'';
+    fill(controls.group,groupColumns,state.group,'不分组');
+    fill(controls.date,columns.filter(c=>c.date),state.date,'不使用日期');
+    if(!state.metric&&!data.metric_locked)state.agg='count_rows';
+    controls.agg.value=state.agg;controls.agg.disabled=Boolean(data.metric_locked);
+    [...controls.agg.options].forEach(option=>option.hidden=!data.metric_locked&&['ratio','weighted_mean'].includes(option.value));
+    const values=new Map();
+    if(live)(data.categories||[]).forEach(item=>values.set(item.value,item.label));
+    else if(state.group)DataLabMetrics.filterRows(data.records,metricSpec().filters||[]).forEach(row=>values.set(categoryKey(row[state.group]),groupLabel(row,state.group)));
+    if(!live&&state.category&&!values.has(state.category))state.category='';
+    fill(controls.category,[...values].sort((a,b)=>a[1].localeCompare(b[1])).map(([value,label])=>({value,label})),state.category,'全部分组');
+    controls.category.disabled=!state.group;
+    controls.start.value=state.start;controls.end.value=state.end;
+    controls.start.disabled=controls.end.disabled=!state.date;
+  }
+  function selectRows(ignoreCategory=false) {
+    return DataLabMetrics.filterRows(data.records,metricSpec().filters||[]).filter(row=>{
+      if(!ignoreCategory&&state.group&&state.category&&categoryKey(row[state.group])!==state.category)return false;
+      const day=state.date?dateFor(row,state.date):'';
+      if(state.date&&(state.start||state.end)&&!day)return false;
+      if(state.date&&state.start&&day<state.start)return false;
+      if(state.date&&state.end&&day>state.end)return false;
+      return true;
+    });
+  }
+  function aggregate(rows) {return sumStats(rows).value;}
+  function groupRows(rows,keyFn,labelFn) {
+    const buckets=new Map();
+    rows.forEach(row=>{const key=keyFn(row);if(key==='')return;if(!buckets.has(key))buckets.set(key,{key,label:labelFn(row),rows:[]});buckets.get(key).rows.push(row);});
+    return [...buckets.values()].map(bucket=>({...bucket,value:aggregate(bucket.rows)}));
+  }
+  function svgElement(name,attributes={},content) {
+    const element=document.createElementNS('http://www.w3.org/2000/svg',name);
+    Object.entries(attributes).forEach(([key,value])=>element.setAttribute(key,String(value)));
+    if(content!=null)element.textContent=content;
+    return element;
+  }
+  function svgRoot(container,height,label) {
+    const width=Math.max(260,Math.floor(container.clientWidth||500));
+    const svg=svgElement('svg',{width:'100%',height,viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':label});
+    svg.append(svgElement('title',{},label));container.replaceChildren(svg);return {svg,width};
+  }
+  function empty(container,message){const p=document.createElement('p');p.className='empty';p.textContent=message;container.replaceChildren(p);}
+  function interactive(element,label,action) {
+    element.setAttribute('tabindex','0');element.setAttribute('role','button');element.setAttribute('aria-label',label);element.classList.add('chart-mark');
+    element.addEventListener('click',action);element.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();action();}});
+  }
+  function drawTrend() {
+    const container=byId('trend');
+    if(!state.date){empty(container,'选择日期字段后查看趋势');byId('trend-note').textContent='';return;}
+    const points=live?(data.trend||[]):groupRows(filtered,row=>periodFor(row,state.date),row=>periodFor(row,state.date)).map(p=>({...p,...(data.period_bounds?.[p.key]||{start:p.key,end:p.key})})).sort((a,b)=>a.key.localeCompare(b.key));
+    const missing=live?(data.missing_dates||0):filtered.filter(row=>!dateFor(row,state.date)).length;
+    byId('trend-note').textContent=(missing?`${missing} 行日期无效，未绘制。`:'')+`按${periodLabel()}汇总 · ${data.timezone||'UTC'}；选择数据点可筛选该周期明细。`;
+    const valid=points.filter(p=>p.value!==null);
+    if(!valid.length){empty(container,'当前筛选下没有可绘制的日期数据');return;}
+    const {svg,width}=svgRoot(container,260,'日期趋势：'+valid.map(p=>`${p.label} ${(p.formatted_value??displayValue(p.value))}`).slice(0,12).join('，'));
+    const left=54,right=20,top=20,bottom=46,w=width-left-right,h=260-top-bottom;
+    const values=valid.map(p=>p.value),lo=values.reduce((min,v)=>Math.min(min,v),0),hi=values.reduce((max,v)=>Math.max(max,v),0),span=hi-lo||1;
+    const first=new Date(points[0].start+'T00:00:00Z').valueOf(),last=new Date(points[points.length-1].start+'T00:00:00Z').valueOf();
+    const x=point=>left+(last===first?w/2:(new Date(point.start+'T00:00:00Z').valueOf()-first)/(last-first)*w);
+    const y=value=>top+(hi-value)/span*h;
+    for(let i=0;i<=4;i++){const value=lo+span*i/4,yy=y(value);svg.append(svgElement('line',{x1:left,x2:width-right,y1:yy,y2:yy,stroke:'#dbe7eb','stroke-width':1}));svg.append(svgElement('text',{x:left-8,y:yy+4,'text-anchor':'end',fill:'#526c77','font-size':11},metricSpec().unit==='percent'?displayValue(value):short.format(value)));}
+    const maxTicks=Math.max(2,Math.floor(w/80));
+    const tickIndices=new Set([0,points.length-1]);for(let i=1;i<maxTicks-1;i++)tickIndices.add(Math.round(i*(points.length-1)/(maxTicks-1)));
+    [...tickIndices].forEach(index=>{const p=points[index];svg.append(svgElement('text',{x:x(p),y:240,'text-anchor':index===0?'start':index===points.length-1?'end':'middle',fill:'#526c77','font-size':11},data.frequency==='W'?p.start.slice(5)+'周':(data.frequency||'D')==='D'?p.key.slice(5):p.key));});
+    let path='',gap=true;points.forEach(p=>{if(p.value===null){gap=true;return;}path+=`${gap?'M':'L'}${x(p)},${y(p.value)} `;gap=false;});
+    svg.append(svgElement('path',{d:path,fill:'none',stroke:chartColor(),'stroke-width':2.5}));
+    // Keep SVG interaction bounded for large daily series; the line retains every point.
+    const stride=Math.max(1,Math.ceil(valid.length/200));
+    valid.forEach((p,index)=>{if(index%stride && index!==valid.length-1)return;const circle=svgElement('circle',{cx:x(p),cy:y(p.value),r:4,fill:chartColor()});circle.append(svgElement('title',{},`${p.label}: ${(p.formatted_value??displayValue(p.value))}`));interactive(circle,`筛选 ${p.label}，${(p.formatted_value??displayValue(p.value))}`,()=>{state.start=p.start;state.end=p.end;state.page=0;configure();render();});svg.append(circle);});
+  }
+  function drawBars() {
+    const container=byId('bars');
+    if(!state.group){empty(container,'选择分组字段后查看比较');byId('group-note').textContent='';return;}
+    const all=(live?(data.groups||[]):groupRows(selectRows(true),row=>categoryKey(row[state.group]),row=>groupLabel(row,state.group))).filter(p=>p.value!==null).sort((a,b)=>b.value-a.value);
+    const rows=all.slice(0,12);
+    byId('group-note').textContent=(all.length>12?`显示前 12 类，共 ${all.length} 类。`:'')+'选择柱形可联动筛选趋势与明细。';
+    if(!rows.length){empty(container,'当前筛选下没有可比较的分组');return;}
+    const height=Math.max(210,rows.length*31+35),{svg,width}=svgRoot(container,height,'分组比较：'+rows.map(p=>`${p.label} ${(p.formatted_value??displayValue(p.value))}`).join('，'));
+    const left=Math.min(115,width*.32),right=70,w=width-left-right;
+    const lo=Math.min(0,...rows.map(p=>p.value)),hi=Math.max(0,...rows.map(p=>p.value)),span=hi-lo||1;
+    const x=value=>left+(value-lo)/span*w;
+    svg.append(svgElement('line',{x1:x(0),x2:x(0),y1:8,y2:rows.length*31+10,stroke:'#ccdce1','stroke-width':1}));
+    rows.forEach((p,index)=>{
+      const yy=12+index*31,valueX=x(p.value),zeroX=x(0),active=!state.category||state.category===p.key;
+      const group=svgElement('g',{}),label=p.label.length>12?p.label.slice(0,11)+'…':p.label;
+      group.append(svgElement('text',{x:left-9,y:yy+14,'text-anchor':'end',fill:'#183742','font-size':12},label));
+      const rect=svgElement('rect',{x:Math.min(zeroX,valueX),y:yy,width:Math.max(1,Math.abs(valueX-zeroX)),height:20,fill:active?chartColor():'#afc9ce',rx:2});
+      group.append(rect);group.append(svgElement('text',{x:Math.max(zeroX,valueX)+7,y:yy+14,fill:'#183742','font-size':12},(p.formatted_value??displayValue(p.value))));
+      group.append(svgElement('title',{},`${p.label}: ${(p.formatted_value??displayValue(p.value))}`));
+      interactive(group,`筛选 ${p.label}，${(p.formatted_value??displayValue(p.value))}`,()=>{state.category=state.category===p.key?'':p.key;state.page=0;configure();render();});svg.append(group);
+    });
+  }
+  function renderTable() {
+    const size=50,total=live?(data.detail_available||0):filtered.length,pages=Math.max(1,Math.ceil(total/size));state.page=Math.min(state.page,pages-1);
+    const start=state.page*size,rows=live?data.records:filtered.slice(start,start+size),head=byId('table').querySelector('thead'),body=byId('table').querySelector('tbody');
+    head.replaceChildren();body.replaceChildren();const tr=document.createElement('tr');
+    data.columns.forEach(column=>{const th=document.createElement('th');th.scope='col';th.textContent=column.name;if(column.numeric)th.className='number';tr.append(th);});head.append(tr);
+    rows.forEach(row=>{const tr=document.createElement('tr');data.columns.forEach(column=>{const td=document.createElement('td'),value=row[column.name];td.textContent=column.numeric&&numeric(value)?number.format(value):text(value);td.title=text(value);if(column.numeric)td.className='number';tr.append(td);});body.append(tr);});
+    byId('page-info').textContent=total?`${start+1}–${start+rows.length} / ${number.format(total)} 行可浏览明细`:'0 行';
+    byId('previous').disabled=state.page===0;byId('next').disabled=state.page>=pages-1;
+  }
+  function renderStatus() {
+    byId('title').textContent=data.title||'数据分析';byId('source').textContent='数据源：'+data.source.file_name+` · 时区 ${data.timezone||'UTC'} · 趋势周期 ${periodLabel()}`;
+    byId('mode').textContent=live?`本地文件刷新 / 每 ${data.status.interval_seconds} 秒`:'静态快照';
+    byId('checked').textContent='最近检查：'+formatTime(data.status.last_checked);
+    byId('changed').textContent='数据变更：'+formatTime(data.status.last_changed);
+    byId('refresh').hidden=!live;
+    const error=data.status.error||networkError;
+    byId('error').hidden=!error;byId('error').textContent=error?`刷新失败，${data.status.last_success?'正在显示上次成功读取的数据':'尚无可用数据'}。${error}`:'';
+    byId('truncated').hidden=!data.detail_truncated;
+    byId('truncated').textContent=`汇总与图表使用全部符合条件的数据；明细仅可浏览前 ${number.format(data.detail_available||0)} / ${number.format(data.detail_total||0)} 行。`; 
+    const trace=byId('trace');trace.replaceChildren();
+    [['文件',data.source.file_name],['源文件 SHA-256',data.source.sha256||'尚无'],['源文件修改时间',formatTime(data.source.modified_at)],['最近成功读取',formatTime(data.status.last_success)],['最近检测到内容变更',formatTime(data.status.last_changed)],['最近检查',formatTime(data.status.last_checked)],['计算范围',`完整源表 ${data.rows_total} 行，指标过滤后按当前筛选重新计算`] ].forEach(([label,value])=>{const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;trace.append(dt,dd);});
+  }
+  function renderCurrent() {
+    filtered=live?data.records:selectRows();
+    const stats=live?data.aggregate:sumStats(filtered),spec=metricSpec();
+    const label=`${spec.label||state.metric||'记录数'} / ${aggregationName[spec.aggregation]||spec.aggregation}`;
+    byId('metric-label').textContent=label;byId('metric-value').textContent=live?(data.formatted_value??'—'):displayValue(stats?.value);
+    byId('row-count').textContent=number.format(stats?.eligible_rows||0);
+    byId('missing-count').textContent=stats?number.format(stats.eligible_rows-stats.valid_rows):'—';
+    byId('trend-unit').textContent=byId('group-unit').textContent=label;
+    const notes={ratio:'按共同有效记录重算分子合计 / 分母合计；零分母显示未定义。',weighted_mean:'按共同有效记录重算加权平均；零权重合计显示未定义。',count_rows:'统计符合指标条件的数据行，包括指标缺失记录。',count_nonmissing:'仅统计指定字段的非空值；与分析报告使用相同口径。',count_distinct:'对当前筛选结果重新去重，排除空值。',mean:'逐行简单平均，未加权；整体比率应注册分子、分母定义。'};
+    byId('method').textContent=(data.metric_locked?'指标定义已锁定。':'')+(notes[spec.aggregation]||'缺失及非有限数值不参与计算；使用当前筛选的完整记录。')+(data.precision_notice||'');
+    renderStatus();drawTrend();drawBars();renderTable();
+  }
+  async function queryLive() {
+    const sequence=++querySequence,requested={...state};
+    try {
+      const response=await fetch('/api/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(requested),cache:'no-store',credentials:'same-origin'});
+      if(!response.ok)throw new Error(`查询失败（${response.status}），请检查字段和筛选条件。`);
+      const next=await response.json();if(sequence!==querySequence)return;
+      data=next;state=next.query;networkError='';configure();renderCurrent();
+    }catch(error){if(sequence===querySequence){networkError=error.message;renderStatus();}}
+  }
+  function render() {
+    if(live){queryLive();return;}
+    try{networkError='';renderCurrent();}catch(error){networkError=error.message;renderStatus();}
+  }
+  fields.forEach(key=>controls[key].addEventListener('change',()=>{
+    state[key]=controls[key].value;state.page=0;
+    if(key==='metric'){const column=data.columns.find(c=>c.name===state.metric);state.agg=state.metric?(column?.numeric?(column?.rate?'mean':'sum'):'count_nonmissing'):'count_rows';}
+    if(key==='agg'&&state.agg==='count_rows')state.metric='';
+    if(key==='group')state.category='';
+    if(key==='date'){state.start='';state.end='';}
+    configure();render();
+  }));
+  byId('reset').addEventListener('click',()=>{configure(false);render();});
+  byId('previous').addEventListener('click',()=>{state.page=Math.max(0,state.page-1);live?render():renderTable();});
+  byId('next').addEventListener('click',()=>{state.page++;live?render():renderTable();});
+  async function refresh(force=false) {
+    if(!live||busy)return;busy=true;byId('refresh').disabled=true;
+    try {
+      const response=await fetch('/api/data'+(force?'?refresh=1':''),{cache:'no-store',credentials:'same-origin'});
+      if(!response.ok)throw new Error(`本地服务返回 ${response.status}`);
+      const next=await response.json();
+            data=next;networkError='';
+      configure();await queryLive();
+    } catch(error) {networkError='无法连接本地刷新服务；请确认 serve 命令仍在运行。';renderStatus();}
+    finally {busy=false;byId('refresh').disabled=false;}
+  }
+  byId('refresh').addEventListener('click',()=>refresh(true));
+  if(data.preferences?.charts?.color)document.documentElement.style.setProperty('--brand',data.preferences.charts.color);
+  configure();render();
+  if(live)timer=setInterval(refresh,Math.max(2000,data.status.interval_seconds*1000));
+  const resize=new ResizeObserver(()=>{drawTrend();drawBars();});resize.observe(byId('trend'));resize.observe(byId('bars'));
+  window.addEventListener('pagehide',()=>{if(timer)clearInterval(timer);resize.disconnect();},{once:true});
+})();
+</script>
+</body>
+</html>

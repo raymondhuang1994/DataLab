@@ -1,0 +1,284 @@
+{
+  "kind": "deterministic_business_task_benchmarks",
+  "synthetic_data": true,
+  "passed": 28,
+  "total": 28,
+  "seconds": 0.168,
+  "scope": "Checks computations and validation against known answers; does not score autonomous reasoning, narrative or visual quality.",
+  "results": [
+    {
+      "id": "01_ratio_weighting",
+      "task": "渠道访问量不同，求整体转化率，不要平均每期百分比。",
+      "passed": true,
+      "observed": {
+        "value": 0.06363636363636363,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "02_zero_denominator",
+      "task": "没有访问时，转化率是否可以记为零？",
+      "passed": true,
+      "observed": {
+        "value": null,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "03_paired_missing",
+      "task": "一行成交缺失，明确共同有效样本后计算比例。",
+      "passed": true,
+      "observed": {
+        "value": 0.1,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "04_weighted_mean",
+      "task": "按客户量合并两个群体的人均金额。",
+      "passed": true,
+      "observed": {
+        "value": 6.363636363636363,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "05_distinct_customers",
+      "task": "统计独立客户，不将重复订单当作新客户。",
+      "passed": true,
+      "observed": {
+        "value": 2,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "06_nonmissing_count",
+      "task": "统计已记录客户编号的订单行数。",
+      "passed": true,
+      "observed": {
+        "value": 3,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "07_all_rows",
+      "task": "统计全部订单行，包含客户编号缺失。",
+      "passed": true,
+      "observed": {
+        "value": 4,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "08_valid_status",
+      "task": "只统计有效订单的收入，取消订单不能进入指标。",
+      "passed": true,
+      "observed": {
+        "value": 10,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "09_null_filter",
+      "task": "排除取消订单时，不应默默把未知状态当有效。",
+      "passed": true,
+      "observed": {
+        "value": 10,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "10_negative_denominator",
+      "task": "发现负访问人数，应拒绝比例计算并指出数据问题。",
+      "passed": true,
+      "observed": {
+        "rejected": true,
+        "reason": "Denominators and weights cannot be negative, including rows with a missing numerator."
+      }
+    },
+    {
+      "id": "11_empty_filter",
+      "task": "筛选后没有记录，收入合计不能伪造为零。",
+      "passed": true,
+      "observed": {
+        "value": null,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "12_fraction_precision",
+      "task": "三次访问成交一次，保留完整数值，百分比仅用于展示。",
+      "passed": true,
+      "observed": {
+        "value": 0.3333333333333333,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "13_missing_month",
+      "task": "一月和三月有数据，二月缺失不能填成零。",
+      "passed": true,
+      "observed": {
+        "value": 30,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "14_business_timezone",
+      "task": "北京时间月末汇总，不能按UTC日期错归到上月。",
+      "passed": true,
+      "observed": {
+        "value": 30,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "15_duplicate_join_key",
+      "task": "关联后的订单主键重复，禁止在错误粒度上汇总收入。",
+      "passed": true,
+      "observed": {
+        "rejected": true,
+        "reason": "项目数据质量规则未通过：主键 ['order_id'] 必须存在、非空且组合唯一。"
+      }
+    },
+    {
+      "id": "16_composite_key",
+      "task": "同一客户跨月记录合法，按客户和月份组合检查唯一性。",
+      "passed": true,
+      "observed": {
+        "value": 30,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "17_quality_missing",
+      "task": "金额缺失超过项目阈值时，不能继续交付正式汇总。",
+      "passed": true,
+      "observed": {
+        "rejected": true,
+        "reason": "项目数据质量规则未通过：revenue 缺失比例 0.5；上限 0.1。"
+      }
+    },
+    {
+      "id": "18_leading_zero_ids",
+      "task": "编号001与1是不同客户，不能因为数字推断合并。",
+      "passed": true,
+      "observed": {
+        "value": 2,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "19_refund_amounts",
+      "task": "销售100、退款30，净收入应保留负金额。",
+      "passed": true,
+      "observed": {
+        "value": 70,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "20_all_missing",
+      "task": "金额全部缺失，明确不可计算，不能声称收入为零。",
+      "passed": true,
+      "observed": {
+        "value": null,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "21_segment_ratio",
+      "task": "分别计算各渠道合计比例，保持总体和分组同口径。",
+      "passed": true,
+      "observed": {
+        "value": 0.07272727272727272,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "22_simple_mean",
+      "task": "用户明确要求逐条观测简单平均，不能擅自改为加权。",
+      "passed": true,
+      "observed": {
+        "value": 12.5,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "23_tampered_ratio",
+      "task": "结果包的总体比例被误改，应独立复算发现错误。",
+      "passed": true,
+      "observed": {
+        "value": 0.99,
+        "checks_status": "failed",
+        "status": "failed"
+      }
+    },
+    {
+      "id": "24_tampered_summary",
+      "task": "正文被换成99%和无依据因果，原证据链应失效。",
+      "passed": true,
+      "observed": {
+        "value": 0.3333333333333333,
+        "checks_status": "failed",
+        "status": "failed"
+      }
+    },
+    {
+      "id": "25_empty_bundle",
+      "task": "没有来源和分析内容的空成果包不能通过验证。",
+      "passed": true,
+      "observed": {
+        "checks_status": "failed"
+      }
+    },
+    {
+      "id": "26_review_boundary",
+      "task": "算术全通过时，也不能自动证明业务叙述和版式已审阅。",
+      "passed": true,
+      "observed": {
+        "value": 7,
+        "checks_status": "passed",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "27_unavailable_source",
+      "task": "原始数据不可访问时，明确降低验证覆盖范围。",
+      "passed": true,
+      "observed": {
+        "value": 7,
+        "checks_status": "warning",
+        "status": "needs_review"
+      }
+    },
+    {
+      "id": "28_required_column",
+      "task": "项目要求的字段缺失时，拒绝按不完整数据生成结果。",
+      "passed": true,
+      "observed": {
+        "rejected": true,
+        "reason": "项目数据质量规则未通过：必需字段 currency"
+      }
+    }
+  ]
+}
