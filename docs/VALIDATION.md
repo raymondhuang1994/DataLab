@@ -5,6 +5,7 @@
 | 检查 | 实际结果 |
 |---|---|
 | 本地完整回归 | macOS arm64 / Python3.12：281 passed、2 skipped，25.58秒；两项跳过为Windows专属测试 |
+| 原生跨平台CI | Windows/macOS × Python3.11/3.12/3.13共6组全部通过；macOS每组281 passed、2 skipped，Windows每组278 passed、5 skipped；跳过项为另一平台专属测试 |
 | 业务场景计算与验证 | 28/28通过，原有指标计算口径保持一致 |
 | 覆盖保护 | 已有原件、配置、报告、发布包、安装与环境目标拒绝覆盖；已有空分析目录也拒绝 |
 | 运行所有权 | 同次命令可更新自己新建且未被外部修改的产物；后续命令不继承权限 |
@@ -14,6 +15,7 @@
 | Word转换 | 原DOCX保持不变；LibreOffice仅接收任务内副本，转换为PDF成功；本轮未重复宣称完整Office视觉验收 |
 | 维护命令 | bootstrap拒绝已有环境；安装、打包、合成样例生成使用新目标 |
 | Skill结构 | 元数据、相对链接、Python语法和打包资源检查通过 |
+| 解压包试用 | 源码包与独立Skill包均完成分析、验证、Word和看板；重复输出被拒绝，原始样例、包内文件与已有成果保持不变 |
 
 ## 独立使用任务
 
@@ -31,4 +33,6 @@
 
 v0.2历史记录保留在[VALIDATION-0.2.md](VALIDATION-0.2.md)。文件使用规则见[READ-ONLY.md](READ-ONLY.md)。
 
-远程CI：待本版提交后补实际运行链接和结果，不能用v0.2记录代替。
+远程CI：[本版6组完整检查](https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068)，运行代码提交`de8c18563d95e538b16e392b13a5ac6d0bdc3fba`。每组均完成包结构、pytest、doctor、28项业务场景和打包。首次运行定位并修正了Windows元数据目录句柄未参与共享检查的问题；保留原回归断言后重新通过。发布前的后续变更仅补充文档及验证证据。
+
+可机读记录：[跨平台CI](../evaluations/observed/cross-platform-ci-0.3.json)、[业务评测](../evaluations/observed/business-benchmarks-0.3.json)、[独立任务](../evaluations/observed/readonly-agent-task-0.3.json)、[候选包试用](../evaluations/observed/package-smoke-0.3.json)。候选包试用在本地macOS执行；其后Windows句柄修复由上述原生CI覆盖，最终发布包另核对与Git提交的文件字节一致。

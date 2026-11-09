@@ -1,0 +1,167 @@
+{
+  "platform": "darwin",
+  "python": "3.12.14",
+  "packages": [
+    {
+      "kind": "source",
+      "archive": "DataLab-0.3.0.zip",
+      "sha256": "30b80df04b525ddb486fc6deac979f9f6ee0152e4180694b0b831c2cb7c8d935",
+      "file_count": 111,
+      "forbidden_entries": [],
+      "private_content_findings": [],
+      "commands": [
+        {
+          "command": "analyze",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "validate",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "word",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "dashboard",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "analyze",
+          "returncode": 2,
+          "expected": 2
+        },
+        {
+          "command": "validate",
+          "returncode": 2,
+          "expected": 2
+        },
+        {
+          "command": "word",
+          "returncode": 2,
+          "expected": 2
+        },
+        {
+          "command": "dashboard",
+          "returncode": 2,
+          "expected": 2
+        }
+      ],
+      "metric_value": 0.31000000918033704,
+      "checks_status": "passed",
+      "status": "needs_review",
+      "audit_records": [
+        {
+          "file": "audit/file-safety-c24ba0f78091452db384348dc17387f1.json",
+          "status": "completed",
+          "inputs": 3
+        },
+        {
+          "file": "audit/file-safety-2629932dcda84edf8d2706bc4fb2efe3.json",
+          "status": "completed",
+          "inputs": 12
+        },
+        {
+          "file": "audit/file-safety-14a82432648e40268af8594be943c4cc.json",
+          "status": "completed",
+          "inputs": 12
+        },
+        {
+          "file": "analysis/audit/file-safety-b7138389166148df9b67719e84c70661.json",
+          "status": "completed",
+          "inputs": 3
+        }
+      ],
+      "existing_outputs_preserved": true
+    },
+    {
+      "kind": "skill",
+      "archive": "data-lab-skill-0.3.0.zip",
+      "sha256": "f66e480ecc45369a153f0b01d6a9023613eef609b37298ce28f53003173c3424",
+      "file_count": 43,
+      "forbidden_entries": [],
+      "private_content_findings": [],
+      "commands": [
+        {
+          "command": "analyze",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "validate",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "word",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "dashboard",
+          "returncode": 0,
+          "expected": 0
+        },
+        {
+          "command": "analyze",
+          "returncode": 2,
+          "expected": 2
+        },
+        {
+          "command": "validate",
+          "returncode": 2,
+          "expected": 2
+        },
+        {
+          "command": "word",
+          "returncode": 2,
+          "expected": 2
+        },
+        {
+          "command": "dashboard",
+          "returncode": 2,
+          "expected": 2
+        }
+      ],
+      "metric_value": 0.31000000918033704,
+      "checks_status": "passed",
+      "status": "needs_review",
+      "audit_records": [
+        {
+          "file": "audit/file-safety-afba51c4422d4fa3a477545648d3686b.json",
+          "status": "completed",
+          "inputs": 12
+        },
+        {
+          "file": "audit/file-safety-da1bf108999c4e5f9b3cd9c6de1ab83d.json",
+          "status": "completed",
+          "inputs": 3
+        },
+        {
+          "file": "audit/file-safety-dbf1eef2c6914b519b4cbb121b238627.json",
+          "status": "completed",
+          "inputs": 12
+        },
+        {
+          "file": "analysis/audit/file-safety-f89dc8cb01024062a1f8cddd1bf21211.json",
+          "status": "completed",
+          "inputs": 3
+        }
+      ],
+      "existing_outputs_preserved": true
+    }
+  ],
+  "original_input_hashes": {
+    "sales.csv": "d811bdf0d3a2b4b597a1e17f5a40df498e27944e0f8e37fcb03802586e724076",
+    "project.json": "89682048e7f0d01aa8c90c027586b08c89f697ff283c962e19dfa2a7edc8a7b9",
+    "preferences.json": "c3c48ecca311bbe2b935bbeb042f25ab7154b1d0926c24eb4468fa72d046295d"
+  },
+  "original_inputs_unchanged": true,
+  "extracted_packages_unchanged": true,
+  "verified_at": "2026-11-09",
+  "scope": "Candidate ZIP smoke tests on macOS before the Windows directory-access flag fix; final Windows behavior is covered by cross-platform-ci-0.3.json. Candidate hashes are not the final release asset hashes."
+}

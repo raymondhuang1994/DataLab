@@ -1,0 +1,369 @@
+{
+  "verified_at": "2026-11-09",
+  "workflow_url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068",
+  "runtime_commit": "de8c18563d95e538b16e392b13a5ac6d0bdc3fba",
+  "conclusion": "success",
+  "scope": "GitHub-hosted Windows/macOS runners. Excludes desktop-client installation, host OS isolation and Microsoft Word layout acceptance. Later release changes are documentation/evidence only.",
+  "jobs": [
+    {
+      "name": "runtime (macos-latest, 3.13)",
+      "url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068/job/128939803294",
+      "conclusion": "success",
+      "pytest": {
+        "passed": 281,
+        "skipped": 2,
+        "skips": "Other-platform-specific cases"
+      },
+      "business_benchmarks": {
+        "passed": 28,
+        "total": 28
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (macos-latest, 3.11)",
+      "url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068/job/128939803419",
+      "conclusion": "success",
+      "pytest": {
+        "passed": 281,
+        "skipped": 2,
+        "skips": "Other-platform-specific cases"
+      },
+      "business_benchmarks": {
+        "passed": 28,
+        "total": 28
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (macos-latest, 3.12)",
+      "url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068/job/128939803514",
+      "conclusion": "success",
+      "pytest": {
+        "passed": 281,
+        "skipped": 2,
+        "skips": "Other-platform-specific cases"
+      },
+      "business_benchmarks": {
+        "passed": 28,
+        "total": 28
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (windows-latest, 3.11)",
+      "url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068/job/128939803521",
+      "conclusion": "success",
+      "pytest": {
+        "passed": 278,
+        "skipped": 5,
+        "skips": "Other-platform-specific cases"
+      },
+      "business_benchmarks": {
+        "passed": 28,
+        "total": 28
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (windows-latest, 3.12)",
+      "url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068/job/128939803560",
+      "conclusion": "success",
+      "pytest": {
+        "passed": 278,
+        "skipped": 5,
+        "skips": "Other-platform-specific cases"
+      },
+      "business_benchmarks": {
+        "passed": 28,
+        "total": 28
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (windows-latest, 3.13)",
+      "url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42548889068/job/128939803567",
+      "conclusion": "success",
+      "pytest": {
+        "passed": 278,
+        "skipped": 5,
+        "skips": "Other-platform-specific cases"
+      },
+      "business_benchmarks": {
+        "passed": 28,
+        "total": 28
+      },
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}
