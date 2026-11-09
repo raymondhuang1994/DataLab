@@ -49,7 +49,7 @@ python tools/check_package.py
 python tools/package.py --out ../outputs
 ```
 
-提供 GitHub Actions Windows/macOS 测试矩阵。当前实际执行结果见 [验证记录](docs/VALIDATION.md)，未运行的平台不会标记为通过。
+GitHub Actions 的 Windows/macOS × Python3.11/3.12/3.13 六组检查已全部通过，本地229项测试通过。实际执行结果和验收边界见 [验证记录](docs/VALIDATION.md)。
 
 `evaluations/` 包含28个业务场景的计算与验证任务，以及3份独立代理任务包。数据均为合成数据。自动任务评分与代理实际分析能力分开记录，不以单元测试数量代替专业分析质量。
 

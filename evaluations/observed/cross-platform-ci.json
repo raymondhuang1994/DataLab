@@ -1,0 +1,309 @@
+{
+  "verified_at": "2026-11-09",
+  "workflow_url": "https://github.com/raymondhuang1994/DataLab/actions/runs/42541350270",
+  "runtime_commit": "14ef1b184832bc8b4ad4d897b3a0436357c01a0a",
+  "conclusion": "success",
+  "scope": "GitHub-hosted Windows/macOS runners, not desktop client installation or Microsoft Word layout acceptance. Later release changes are documentation only.",
+  "jobs": [
+    {
+      "name": "runtime (macos-latest, 3.11)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (windows-latest, 3.11)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (macos-latest, 3.12)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (windows-latest, 3.12)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (macos-latest, 3.13)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "runtime (windows-latest, 3.13)",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pip install -e \".[dev,parquet,interactive]\"",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/check_package.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python -m pytest -q",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python skills/data-lab/scripts/run.py doctor",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python evaluations/run_benchmarks.py --out benchmark-output",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python tools/package.py --out ../release-test",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}

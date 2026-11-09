@@ -7,6 +7,7 @@
 | 检查 | 实际结果与范围 |
 |---|---|
 | 全套 pytest | **229 passed**，11.63秒，无跳过项；涵盖原功能与本次新增模块，含强制cp1252管道的中文输出检查 |
+| GitHub Actions | **6/6任务成功**：Windows/macOS × Python3.11/3.12/3.13；每组实际执行pytest、doctor、28个业务场景、打包检查 |
 | 业务场景任务 | **28/28**；实际读取合成输入，调用分析/验证，对照独立预期值 |
 | 指标一致性 | 8类聚合、10类过滤、明确计数、比例/权重、零分母及缺失处理 |
 | 配置 | 显式JSON、重复键/未知字段拒绝、项目与偏好分离、覆盖冲突、生效来源、配置快照重跑 |
@@ -43,7 +44,6 @@
 ## 未执行与保留边界
 
 - Windows实机运行、Windows Microsoft Word排版检查。
-- GitHub Actions远程执行；已提供Windows/macOS × Python3.11/3.12/3.13及Node的测试配置。
 - 各ChatGPT/Codex客户端的实际安装、账户权限验收、插件公开发布。
 - 大数据压力、生产持续运行、无人值守采集或外部数据库实时连接。
 - 全部自由叙述、因果判断和所有模型假设的自动证明。模型算法及分组拆分能力沿用v0.1范围。
@@ -51,3 +51,5 @@
 Word视觉检查只对应具体文件版本；新数据、字体、纸张或Office版本变化后应重新检查。自动验证仍明确列出自定义计算表、computation样本明细以及语义/视觉等未覆盖项。
 
 核心依赖的实际版本见 `requirements-tested-macos.txt`；这是测试环境快照，不是跨平台锁文件。tzdata显式列入依赖以支持没有系统IANA时区数据库的Windows环境。
+
+远程执行证据：[成功的六组CI](https://github.com/raymondhuang1994/DataLab/actions/runs/42541350270)，运行时代码提交 `14ef1b184832bc8b4ad4d897b3a0436357c01a0a`。之后的发布改动仅为说明文档、Skill收尾规则和本次验证记录。机器可读结果见 `evaluations/observed/cross-platform-ci.json`。这证明托管runner中的执行结果，不代表所有用户电脑或ChatGPT/Codex客户端都已完成安装验收。

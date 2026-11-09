@@ -56,7 +56,7 @@ python skills/data-lab/scripts/run.py serve --input examples/sales.csv --date da
 
 ## 当前验证范围
 
-本项目在 macOS arm64 / Python 3.12 的独立环境中开发验证。提供 Windows/macOS CI 测试配置，但未获得 Windows 实机执行结果。客户端安装、账户权限和云端运行能力应在实际目标环境完成验收，不能根据文件结构直接宣称全部兼容。
+本项目在 macOS arm64 / Python 3.12 的独立环境中开发验证；GitHub托管runner上的Windows/macOS × Python3.11/3.12/3.13六组检查均已通过，见 [验证记录](VALIDATION.md)。Windows个人电脑及Microsoft Word排版、客户端安装、账户权限和云端运行能力仍应在实际目标环境完成验收。
 
 官方参考：[插件打包](https://developers.openai.com/plugins/build/plugins)、[Claude 插件迁移](https://developers.openai.com/plugins/guides/submit-claude-plugin)。
 
