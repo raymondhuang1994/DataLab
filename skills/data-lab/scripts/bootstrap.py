@@ -8,6 +8,8 @@ import venv
 
 
 def main():
+    from datalab.common import configure_utf8_stdio
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description="Prepare DataLab's isolated Python environment")
     parser.add_argument("--venv", required=True, help="An explicit writable environment directory")
     parser.add_argument("--parquet", action="store_true")

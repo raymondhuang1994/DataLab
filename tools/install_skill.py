@@ -3,9 +3,13 @@
 import argparse
 from pathlib import Path
 import shutil
+import sys
 
 
 def main():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "skills/data-lab/scripts"))
+    from datalab.common import configure_utf8_stdio
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser()
     parser.add_argument("--dest", required=True, help="Existing/new parent directory used by your host for skills")
     args = parser.parse_args()

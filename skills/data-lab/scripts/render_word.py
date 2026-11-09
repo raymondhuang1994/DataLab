@@ -113,6 +113,8 @@ def render_word(input_path: Path, output_dir: Path, soffice: str,
 
 
 def main() -> int:
+    from datalab.common import configure_utf8_stdio
+    configure_utf8_stdio()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, type=Path, help="Input DOCX")
     parser.add_argument("--out", required=True, type=Path, help="New output directory")

@@ -124,10 +124,10 @@ def test_invalid_preference_values_rejected(tmp_path, section):
 
 def test_nonfinite_and_duplicate_json_keys_rejected(tmp_path):
     path = tmp_path / "bad.json"
-    path.write_text('{"schema_version":"1.0","display":{"precision":2,"precision":3}}')
+    path.write_text('{"schema_version":"1.0","display":{"precision":2,"precision":3}}', encoding="utf-8")
     with pytest.raises(ValueError, match="Duplicate"):
         load_preferences(path)
-    path.write_text('{"schema_version":"1.0","dashboard":{"interval":NaN}}')
+    path.write_text('{"schema_version":"1.0","dashboard":{"interval":NaN}}', encoding="utf-8")
     with pytest.raises(ValueError, match="Non-finite"):
         load_preferences(path)
 

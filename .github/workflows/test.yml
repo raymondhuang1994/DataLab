@@ -2,6 +2,7 @@ name: DataLab cross-platform checks
 on: [push, pull_request, workflow_dispatch]
 jobs:
   runtime:
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

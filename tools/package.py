@@ -33,7 +33,7 @@ def main():
         parser.error("Choose an output directory outside the source tree.")
     subprocess.run([sys.executable, str(root / "tools/check_package.py")], check=True)
     out.mkdir(parents=True, exist_ok=True)
-    version = json.loads((root / "plugin.json").read_text())["version"]
+    version = json.loads((root / "plugin.json").read_text(encoding="utf-8"))["version"]
     results = [package(root, out / f"DataLab-{version}.zip", "DataLab"),
                package(root / "skills/data-lab", out / f"data-lab-skill-{version}.zip", "data-lab")]
     (out / "SHA256SUMS.txt").write_text("".join(f"{r['sha256']}  {r['file']}\n" for r in results), encoding="utf-8")

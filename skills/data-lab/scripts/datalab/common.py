@@ -7,6 +7,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
+def configure_utf8_stdio():
+    """Keep CLI JSON and Chinese paths readable in Windows redirected pipes."""
+    import sys
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
+
 def utc_now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 

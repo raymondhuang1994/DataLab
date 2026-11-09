@@ -141,6 +141,8 @@ def parser(command=None):
 
 
 def main(argv=None):
+    from .common import configure_utf8_stdio
+    configure_utf8_stdio()
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv == ["doctor"]:
         result = doctor()

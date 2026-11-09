@@ -1,5 +1,6 @@
 """Numerical and leakage checks for the executable modeling workflow."""
 import json
+import os
 import subprocess
 import sys
 import zipfile
@@ -33,21 +34,22 @@ def test_regression_beats_mean_baseline_and_reproduces(tmp_path):
     assert result["selected_model"].startswith("ridge_")
     assert (out / "model_diagnostics.png").stat().st_size > 1000
     assert (out / "code" / "datalab" / "modeling.py").is_file()
-    bundle = json.loads((out / "result.json").read_text())
+    bundle = json.loads((out / "result.json").read_text(encoding="utf-8"))
     assert bundle["schema_version"] == "1.0"
     assert bundle["validation"]["status"] == "needs_review"
     assert bundle["source"]["rows"] == len(data)
     assert validate_bundle(out / "result.json")["checks_status"] == "passed"
-    assert "data:image/png;base64," in (out / "report.html").read_text()
+    assert "data:image/png;base64," in (out / "report.html").read_text(encoding="utf-8")
     word = export_word(out / "result.json", out / "model_report.docx")
     assert word["tables"] >= 2 and word["charts"] == 1
     with zipfile.ZipFile(out / "model_report.docx") as package:
         assert any(name.startswith("word/media/") for name in package.namelist())
     # Test the delivered rerun script, rather than only checking its text.
     run = subprocess.run([sys.executable, str(out / "reproduce.py"), "--input", str(source),
-                          "--out", str(tmp_path / "reproduced")], capture_output=True, text=True)
+                          "--out", str(tmp_path / "reproduced")], capture_output=True, text=True, encoding="utf-8",
+                         env={**os.environ, "PYTHONIOENCODING": "cp1252"})
     assert run.returncode == 0, run.stderr
-    repeated = json.loads((tmp_path / "reproduced" / "model_metrics.json").read_text())
+    repeated = json.loads((tmp_path / "reproduced" / "model_metrics.json").read_text(encoding="utf-8"))
     assert repeated["holdout_metrics"] == result["holdout_metrics"]
 
 
@@ -106,7 +108,7 @@ def test_classification_stratifies_and_reports_missing_targets(tmp_path):
     assert np.allclose(predictions.filter(like="probability_").sum(axis=1), 1)
     assert set(predictions.actual) == {"yes", "no"}
     assert validate_bundle(tmp_path / "classification" / "result.json")["checks_status"] == "passed"
-    bundle = json.loads((tmp_path / "classification" / "result.json").read_text())
+    bundle = json.loads((tmp_path / "classification" / "result.json").read_text(encoding="utf-8"))
     assert any(table["id"] == "model_confusion_matrix" for table in bundle["tables"])
 
 
@@ -226,7 +228,7 @@ def test_nonempty_output_directory_is_preserved(tmp_path):
     protected.write_text("existing result", encoding="utf-8")
     with pytest.raises(ValueError, match="目录必须为空"):
         train_model(source, output, "target", task="regression")
-    assert protected.read_text() == "existing result"
+    assert protected.read_text(encoding="utf-8") == "existing result"
     assert list(output.iterdir()) == [protected]
 
 
@@ -247,5 +249,5 @@ def test_output_file_introduced_during_training_is_not_overwritten(tmp_path, mon
     monkeypatch.setattr(modeling, "load_frame", adding_output)
     with pytest.raises(ValueError, match="目录必须为空"):
         train_model(source, output, "target", task="regression", model_families=["linear"], cv_folds=2)
-    assert protected.read_text() == "keep this concurrent result"
+    assert protected.read_text(encoding="utf-8") == "keep this concurrent result"
     assert list(output.iterdir()) == [protected]

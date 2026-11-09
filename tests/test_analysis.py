@@ -77,7 +77,7 @@ def test_html_escapes_untrusted_labels(tmp_path):
     path = write_csv(tmp_path, [["分类", "值"], ["<script>alert(1)</script>", 1]])
     out = tmp_path / "out"
     analyze(path, out, metric="值", group="分类", charts=False)
-    document = (out / "report.html").read_text()
+    document = (out / "report.html").read_text(encoding="utf-8")
     assert "<script>alert(1)</script>" not in document
     assert "&lt;script&gt;" in document
 

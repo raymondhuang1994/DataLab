@@ -16,7 +16,7 @@ def test_independent_integer_sum_detects_one_unit_tampering(tmp_path):
     analyze(source,out,metric="amount",charts=False)
     bundle=out / "result.json"
     assert validate_bundle(bundle)["checks_status"] == "passed"
-    data=json.loads(bundle.read_text())
+    data=json.loads(bundle.read_text(encoding="utf-8"))
     data["metric"]["value"] += 1
     bundle.write_text(json.dumps(data),encoding="utf-8")
     assert validate_bundle(bundle)["status"] == "failed"

@@ -34,7 +34,7 @@ def js_result(rows, spec, formatted=None):
     if not binary:
         pytest.skip('Node required for Python/JavaScript contract tests (CI installs Node 20)')
     script = "const fs=require('fs'),m=require(process.argv[1]),p=JSON.parse(fs.readFileSync(0,'utf8')); try { process.stdout.write(JSON.stringify({result:m.computeMetric(p.rows,p.spec),formatted:p.formatted?.map(x=>m.formatValue(x.value,x.spec,x.preferences))})); }catch(e){ process.stdout.write(JSON.stringify({error:e.message}));}"
-    result = subprocess.run([binary, '-e', script, str(METRICS_ASSET.resolve())], input=json.dumps({'rows': rows, 'spec': spec, 'formatted': formatted}, ensure_ascii=False), text=True, capture_output=True, check=True)
+    result = subprocess.run([binary, '-e', script, str(METRICS_ASSET.resolve())], input=json.dumps({'rows': rows, 'spec': spec, 'formatted': formatted}, ensure_ascii=False), text=True, encoding="utf-8", capture_output=True, check=True)
     return json.loads(result.stdout)
 
 
@@ -155,7 +155,7 @@ def test_static_registered_definition_full_data_timezone_and_preferences(tmp_pat
     assert data['metric_locked'] is True and len(data['records'])==6
     assert data['metric_definition']['precision']==2
     assert data['date_keys']['date']==[row['date'] for row in ROWS]
-    assert '__METRICS_JS__' not in output.read_text()
+    assert '__METRICS_JS__' not in output.read_text(encoding="utf-8")
     with pytest.raises(ValueError,match='不会截取'):
         build_dashboard(source,tmp_path/'oversize.html',metric_definition=RATIO,preferences={'dashboard':{'max_rows':5}})
 

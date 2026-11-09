@@ -21,12 +21,12 @@ def test_cli_project_metric_and_preferences_reach_all_report_outputs(tmp_path):
     source, project, preferences = project_files(tmp_path)
     out = tmp_path / "输出 空格"
     assert main(["analyze", "--input",str(source),"--project",str(project),"--preferences",str(preferences),"--metric-id","conversion","--out",str(out),"--no-charts"]) == 0
-    data = json.loads((out / "result.json").read_text())
+    data = json.loads((out / "result.json").read_text(encoding="utf-8"))
     assert data["metric"]["value"] == pytest.approx(70/1100)
     assert data["title"] == "我的渠道报告"
     assert data["computation"]["eligible_rows"] == 2
     assert "6.4%" in " ".join(data["summary"])
-    assert "6.4%" in (out / "report.html").read_text()
+    assert "6.4%" in (out / "report.html").read_text(encoding="utf-8")
     assert data["validation"]["checks_status"] == "passed"
     assert data["validation"]["status"] == "needs_review"
     docx = out / "report.docx"
@@ -37,14 +37,14 @@ def test_cli_project_metric_and_preferences_reach_all_report_outputs(tmp_path):
     assert any("6.4%" in cell.text for table in doc.tables for row in table.rows for cell in row.cells)
     replay = tmp_path / "replay"
     assert main(["rerun", "--config",str(out / "config.json"),"--out",str(replay)]) == 0
-    repeated = json.loads((replay / "result.json").read_text())
+    repeated = json.loads((replay / "result.json").read_text(encoding="utf-8"))
     assert repeated["metric"] == data["metric"]
     assert repeated["preferences"] == data["preferences"]
 
 
 def test_project_quality_failure_does_not_create_report(tmp_path):
     source, project, preferences = project_files(tmp_path)
-    definition = json.loads(project.read_text())
+    definition = json.loads(project.read_text(encoding="utf-8"))
     definition["quality"]["unique_key"] = ["channel"]
     project.write_text(json.dumps(definition), encoding="utf-8")
     out = tmp_path / "must_not_exist"

@@ -290,6 +290,9 @@ from pathlib import Path
 root = Path(__file__).resolve().parent
 sys.path.insert(0, str(root / "code"))
 from datalab.modeling import train_model
+from datalab.common import configure_utf8_stdio
+
+configure_utf8_stdio()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", required=True, help="Path to the original data file")

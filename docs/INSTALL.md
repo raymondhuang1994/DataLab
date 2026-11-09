@@ -63,3 +63,5 @@ python skills/data-lab/scripts/run.py serve --input examples/sales.csv --date da
 ## v0.2 项目与偏好
 
 配置使用方式与旧脚本迁移见 [v0.2 使用说明](UPGRADE-0.2.md)。实际字段合同见技能 `references/settings.md`。复制整个技能目录时会保留执行工具、指标计算模块及离线看板JavaScript资源，不要仅复制SKILL.md。
+
+`validate` 返回 `checks_status: passed` 和 `status: needs_review` 表示自动计算检查已结束，业务解释或视觉审阅仍需人工判断；这不是命令仍在等待，也不需要反复运行直到状态变为 `ready`。Word 转换与版式检查分别记录，渲染脚本可通过 `--timeout` 限制单个转换进程的等待时间。
