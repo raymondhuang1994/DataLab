@@ -1,6 +1,6 @@
 # 功能来源与本版范围
 
-DataLab 0.2.0 以 Anthropic `knowledge-work-plugins/data` 的工作流为参考，重新组织为面向 ChatGPT/Codex 的单入口 Skill，并增加可执行的 Python 工具。上游版本及许可证见根目录 NOTICE。
+DataLab 以 Anthropic `knowledge-work-plugins/data` 的工作流为参考，重新组织为面向 ChatGPT/Codex 的单入口 Skill，并增加可执行的 Python 工具。上游版本及许可证见根目录 NOTICE。
 
 | 工作流 | 上游已有的指导能力 | DataLab 本次实现/扩展 |
 |---|---|---|
@@ -29,3 +29,7 @@ DataLab 0.2.0 以 Anthropic `knowledge-work-plugins/data` 的工作流为参考�
 - 看板旧count有指标时统一为非空计数；明确需要所有行请用count_rows，需要去重请用count_distinct。
 - 实时看板完整源数据在服务端计算；明细上限不截断KPI。离线超过行数上限明确拒绝，避免以局部数据冒充总体。
 - 建模算法和预测评估范围沿用v0.1；本轮优先提高口径、检查、评测与可配置性。
+
+## v0.3 文件保护升级
+
+原始数据、配置与历史成果只读；内置输出统一使用任务范围检查和独占创建。分析/建模必须使用新目录，重导出使用新文件名，审计记录输入前后指纹与登记产物。保护通过文件系统目录句柄缩小路径替换风险，但不是限制任意脚本和第三方程序的操作系统沙箱；完整规则见 [READ-ONLY.md](READ-ONLY.md)。

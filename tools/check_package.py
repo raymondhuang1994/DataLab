@@ -32,7 +32,7 @@ def main():
             ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except SyntaxError as exc:
             errors.append(str(exc))
-    for path in ["LICENSE", "NOTICE", "skills/data-lab/scripts/requirements.txt", "skills/data-lab/scripts/datalab/assets/dashboard.html", "skills/data-lab/scripts/datalab/assets/dashboard_metrics.js", "skills/data-lab/scripts/datalab/metrics.py", "skills/data-lab/scripts/datalab/settings.py", "skills/data-lab/scripts/datalab/safety.py", "skills/data-lab/references/safety.md", "skills/data-lab/references/settings.md", "skills/data-lab/agents/openai.yaml"]:
+    for path in ["LICENSE", "NOTICE", "skills/data-lab/scripts/requirements.txt", "skills/data-lab/scripts/datalab/assets/dashboard.html", "skills/data-lab/scripts/datalab/assets/dashboard_metrics.js", "skills/data-lab/scripts/datalab/metrics.py", "skills/data-lab/scripts/datalab/settings.py", "skills/data-lab/scripts/datalab/safety.py", "skills/data-lab/scripts/datalab/secure_io.py", "skills/data-lab/references/safety.md", "skills/data-lab/references/settings.md", "skills/data-lab/agents/openai.yaml"]:
         if not (root / path).is_file():
             errors.append("Missing package file: " + path)
     if errors:

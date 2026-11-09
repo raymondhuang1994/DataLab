@@ -117,6 +117,10 @@ def test_windows_parent_is_locked_against_rename_until_file_write_finishes(tmp_p
                     observed.append("blocked")
                 else:
                     observed.append("renamed")
+                assert (observed, write_handles) == (["blocked"], ["blocked"]), (
+                    "Ancestor lock ineffective before file creation: "
+                    f"rename={observed}, write_handle={write_handles}"
+                )
             return real_handle(path, directory=directory, create=create)
 
         monkeypatch.setattr(secure_io, "_windows_handle", attempt_rename)

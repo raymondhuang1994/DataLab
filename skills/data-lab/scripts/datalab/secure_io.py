@@ -118,7 +118,9 @@ def _windows_handle(path, *, directory, create=False):
         name = "\\\\?\\UNC\\" + name[2:] if name.startswith("\\\\") else "\\\\?\\" + name
     # Deny directory write handles as well as delete/rename: changing reparse
     # data through FSCTL_SET_REPARSE_POINT must not redirect subsequent opens.
-    access = 0 if directory else 0x80000000 | 0x40000000  # GENERIC_READ | WRITE
+    # FILE_LIST_DIRECTORY (1) requests directory data access so the handle
+    # participates in sharing checks; metadata-only access (0) does not.
+    access = 1 if directory else 0x80000000 | 0x40000000  # GENERIC_READ | WRITE
     share = 1  # FILE_SHARE_READ only; never FILE_SHARE_WRITE/DELETE
     attributes = 0x00200000 | (0x02000000 if directory else 0x80)
     handle = kernel.CreateFileW(name, access, share, None, 1 if create else 3, attributes, None)
