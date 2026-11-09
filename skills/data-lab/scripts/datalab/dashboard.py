@@ -18,6 +18,7 @@ from .common import guard_output_path, json_safe
 from .metrics import normalize_metric, legacy_metric, filter_frame, compute_metric, format_value
 from .grouping import group_labels
 from .quality import check_quality
+from .safety import output_session, safe_write_text
 
 ASSET = Path(__file__).resolve().parent / 'assets' / 'dashboard.html'
 METRICS_ASSET = ASSET.with_name('dashboard_metrics.js')
@@ -227,7 +228,11 @@ class SourceStore:
                 return False
 
     def _status(self):
-        return {'source': dict(self.source), 'status': {'last_checked': self.last_checked, 'last_success': self.last_success,
+        return {'source': dict(self.source),
+                'protection': {'mode': 'software_guards', 'source_access': 'read_only',
+                               'external_source_updates_allowed': self.live,
+                               'integrity_scope': 'each_snapshot_read', 'os_isolation_verified': False},
+                'status': {'last_checked': self.last_checked, 'last_success': self.last_success,
                 'last_changed': self.last_changed, 'stale': self.error is not None, 'error': self.error, 'interval_seconds': self.interval}}
 
     def snapshot(self):
@@ -342,16 +347,18 @@ def _defaults(options, preferences):
 
 def build_dashboard(input_path, output_path, date_column=None, metric=None, group=None, sheet=None,
                     metric_definition=None, preferences=None, **options):
-    store = SourceStore(input_path, sheet=sheet, live=False, date_column=date_column, metric=metric, group=group,
-                        metric_definition=metric_definition, **_defaults(options, preferences))
-    payload = store.snapshot()
-    if payload['status']['error']:
-        raise ValueError(payload['status']['error'])
-    output = guard_output_path(input_path, {}, output_path)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(_render_page(payload), encoding='utf-8')
-    return {'output_path': str(output), 'rows_total': payload['rows_total'], 'rows_loaded': payload['rows_loaded'],
-            'truncated': False, 'source_sha256': payload['source']['sha256']}
+    files = options.get('settings_provenance', {}).get('files', {})
+    configs = [item['path'] for item in files.values() if isinstance(item, dict) and item.get('path')]
+    with output_session(output_path, inputs=configs, raw_inputs=[input_path]):
+        store = SourceStore(input_path, sheet=sheet, live=False, date_column=date_column, metric=metric, group=group,
+                            metric_definition=metric_definition, **_defaults(options, preferences))
+        payload = store.snapshot()
+        if payload['status']['error']:
+            raise ValueError(payload['status']['error'])
+        output = guard_output_path(input_path, {}, output_path)
+        safe_write_text(output, _render_page(payload), encoding='utf-8')
+        return {'output_path': str(output), 'rows_total': payload['rows_total'], 'rows_loaded': payload['rows_loaded'],
+                'truncated': False, 'source_sha256': payload['source']['sha256'], 'protection': payload['protection']}
 
 
 class DashboardServer(ThreadingHTTPServer):
@@ -455,7 +462,8 @@ def _common_options(args):
 
 
 def _dashboard_command(args):
-    return build_dashboard(args.input, args.out, **_common_options(args))
+    with output_session(args.out, inputs=[p for p in (args.project, args.preferences) if p], raw_inputs=[args.input]):
+        return build_dashboard(args.input, args.out, **_common_options(args))
 
 
 def _serve_command(args):

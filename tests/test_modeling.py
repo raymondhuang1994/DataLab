@@ -17,7 +17,9 @@ from datalab.word_report import export_word
 
 
 def _csv(tmp_path, data, name="data.csv"):
-    path = tmp_path / name
+    inputs = tmp_path / "inputs"
+    inputs.mkdir(exist_ok=True)
+    path = inputs / name
     data.to_csv(path, index=False)
     return path
 
@@ -204,19 +206,23 @@ def test_source_changed_during_read_is_rejected(tmp_path, monkeypatch):
         return frame
 
     monkeypatch.setattr(modeling, "load_frame", changing_load)
-    with pytest.raises(ValueError, match="读取期间源文件发生变化"):
+    with pytest.raises(ValueError, match="发生变化"):
         train_model(source, tmp_path / "out", "target", task="regression")
-    assert not (tmp_path / "out").exists()
+    assert not (tmp_path / "out" / "model_metrics.json").exists()
+    audit = json.loads(next((tmp_path / "out" / "audit").glob("*.json")).read_text(encoding="utf-8"))
+    assert audit["status"] == "failed"
+    assert any(item["status"] == "changed" for item in audit["inputs"])
 
 
 def test_input_inside_output_directory_is_rejected_without_modification(tmp_path):
     data = pd.DataFrame({"x": range(30), "target": np.arange(30, dtype=float)})
     source = _csv(tmp_path, data)
     original = source.read_bytes()
-    with pytest.raises(ValueError, match="不能包含输入文件"):
+    with pytest.raises(ValueError, match="已有|不能包含输入文件"):
         train_model(source, tmp_path, "target", task="regression")
     assert source.read_bytes() == original
-    assert sorted(path.name for path in tmp_path.iterdir()) == [source.name]
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["inputs"]
+    assert list(source.parent.iterdir()) == [source]
 
 
 def test_nonempty_output_directory_is_preserved(tmp_path):
@@ -226,7 +232,7 @@ def test_nonempty_output_directory_is_preserved(tmp_path):
     output.mkdir()
     protected = output / "model_metrics.json"
     protected.write_text("existing result", encoding="utf-8")
-    with pytest.raises(ValueError, match="目录必须为空"):
+    with pytest.raises(ValueError, match="已有"):
         train_model(source, output, "target", task="regression")
     assert protected.read_text(encoding="utf-8") == "existing result"
     assert list(output.iterdir()) == [protected]
@@ -238,16 +244,19 @@ def test_output_file_introduced_during_training_is_not_overwritten(tmp_path, mon
     source = _csv(tmp_path, data)
     output = tmp_path / "out"
     protected = output / "model_metrics.json"
+    original = source.read_bytes()
     real_load = modeling.load_frame
 
     def adding_output(path, sheet=None):
         frame = real_load(path, sheet=sheet)
-        output.mkdir()
+        output.mkdir(exist_ok=True)
         protected.write_text("keep this concurrent result", encoding="utf-8")
         return frame
 
     monkeypatch.setattr(modeling, "load_frame", adding_output)
-    with pytest.raises(ValueError, match="目录必须为空"):
+    with pytest.raises(ValueError, match="不能覆盖"):
         train_model(source, output, "target", task="regression", model_families=["linear"], cv_folds=2)
     assert protected.read_text(encoding="utf-8") == "keep this concurrent result"
-    assert list(output.iterdir()) == [protected]
+    assert source.read_bytes() == original
+    audit = json.loads(next((output / "audit").glob("*.json")).read_text(encoding="utf-8"))
+    assert audit["status"] == "failed"

@@ -1,12 +1,15 @@
 """Static charts with common fonts on Windows/macOS and reproducible source tables."""
 from __future__ import annotations
 import os
+from io import BytesIO
 from pathlib import Path
-import tempfile
+from .safety import cache_directory, current_session, output_session, safe_write_bytes
 
 
 def setup_plotting():
-    os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "datalab-mpl"))
+    plotting_cache = cache_directory("matplotlib")
+    os.environ["MPLCONFIGDIR"] = str(plotting_cache)
+    current_session().record_external_writer("Matplotlib font cache", plotting_cache)
     import matplotlib
     matplotlib.use("Agg")
     from matplotlib import font_manager, pyplot as plt
@@ -22,6 +25,14 @@ def setup_plotting():
 
 
 def chart_table(table, directory, filename, kind="bar", ylabel="数值", metric_spec=None, preferences=None):
+    # A table already supplied in memory has no file input to mutate. The
+    # destination must still belong to a new or current task, and must not
+    # replace figures from an earlier invocation.
+    with output_session(directory, directory=True):
+        return _chart_table(table, directory, filename, kind, ylabel, metric_spec, preferences)
+
+
+def _chart_table(table, directory, filename, kind="bar", ylabel="数值", metric_spec=None, preferences=None):
     import numpy as np
     plt, fonts = setup_plotting()
     preferences = preferences or {}
@@ -67,10 +78,14 @@ def chart_table(table, directory, filename, kind="bar", ylabel="数值", metric_
                     ax.set_ylim(low, high)
     ax.set_title(table["title"], loc="left", pad=14)
     fig.tight_layout()
-    directory = Path(directory); directory.mkdir(parents=True, exist_ok=True)
-    for extension in ("png", "svg"):
-        fig.savefig(directory / f"{filename}.{extension}", bbox_inches="tight")
-    plt.close(fig)
+    directory = Path(directory)
+    try:
+        for extension in ("png", "svg"):
+            image = BytesIO()
+            fig.savefig(image, format=extension, bbox_inches="tight")
+            safe_write_bytes(directory / f"{filename}.{extension}", image.getvalue())
+    finally:
+        plt.close(fig)
     return {"title": table["title"], "path": f"charts/{filename}.png", "svg_path": f"charts/{filename}.svg",
             "caption": f"来源：{table['source_file']}。" + ("图表仅显示排名前 20 类；完整数据见结果表。" if kind == "bar" and len(table["rows"]) > 20 else ""),
             "table_id": table["id"], "fonts": fonts, "value_axis_limits": list(ax.get_xlim() if kind == "bar" else ax.get_ylim()),

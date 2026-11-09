@@ -11,6 +11,8 @@ from datalab.report import render_html
 
 
 def write_csv(tmp_path, rows, filename="中文 数据.csv"):
+    tmp_path = tmp_path / "inputs"
+    tmp_path.mkdir(parents=True, exist_ok=True)
     path = tmp_path / filename
     with path.open("w", encoding="utf-8-sig", newline="") as stream:
         csv.writer(stream).writerows(rows)
@@ -110,7 +112,7 @@ def test_output_cannot_contain_source(tmp_path):
     (out / "tables").mkdir(parents=True)
     path = write_csv(out / "tables", [["x"], [7]], "profile.csv")
     original = path.read_bytes()
-    with pytest.raises(ValueError, match="已有"):
+    with pytest.raises(ValueError, match="已有|原始数据目录"):
         analyze(path, out, metric="x", charts=False)
     assert path.read_bytes() == original
 

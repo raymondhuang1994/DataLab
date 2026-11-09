@@ -36,6 +36,8 @@ def _infer_safe_numbers(df):
 
 
 def load_frame(path, sheet=None):
+    from .safety import register_input
+    register_input(path, raw=True)
     path = Path(path).expanduser()
     if not path.is_file():
         raise ValueError(f"找不到数据文件: {path}")

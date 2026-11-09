@@ -1,12 +1,14 @@
 # Word 报告
 
-当用户需要可编辑的 Word 报告时，将已核对的分析结果写入 `result.json`，再运行：
+当用户需要可编辑的 Word 报告时，使用已核对的分析结果包，再运行：
 
 ```text
 python scripts/run.py word --bundle "结果目录/result.json" --out "结果目录/分析报告.docx"
 ```
 
 在 `skills/data-lab` 目录运行上面的命令；其他位置使用入口脚本的完整路径。`word_report.export_word(bundle_path, output_path)` 也可直接调用。
+
+目标 DOCX 必须不存在；已有成果目录可以追加新文件，但不能覆盖旧报告。再次导出时使用 `分析报告-v2.docx` 等新名称。原始数据目录禁止写入，即使新文件名尚不存在。需要修订旧 `result.json` 时，在新任务目录准备完整副本并维护其相对表格/图表引用，原成果包保持不变。见 [只读输入与安全输出](safety.md)。
 
 ## 输入与内容
 
@@ -31,12 +33,12 @@ python scripts/run.py word --bundle "结果目录/result.json" --out "结果目�
 随附的跨平台渲染助手可将 DOCX 转成 PDF：
 
 ```text
-python scripts/render_word.py --input "结果目录/分析报告.docx" --out "结果目录/word-preview"
+python scripts/render_word.py --input "结果目录/分析报告.docx" --out "预览目录/word-preview-001"
 ```
 
 需要逐页 PNG 时添加 `--png`，并安装 Poppler（提供 `pdftoppm`）或 PyMuPDF（`python -m pip install PyMuPDF`）。默认 150 DPI，可用 `--dpi` 指定 72–300 DPI。转换必需 LibreOffice；脚本会检查 PATH、Windows Program Files 和 macOS Applications，可用 `--soffice "可执行文件完整路径"` 指定位置。它使用独立临时用户配置、参数列表调用，不修改系统字体配置。
 
-`--out` 必须是尚不存在的新目录，防止覆盖已有结果。PDF 始终保留；缺少 PNG 渲染器会明确报错并提示检查已有 PDF。`render.json` 中的 `visual_qa: not_reviewed` 只表示已经转换，不能作为版式验收通过。必须实际打开并检查所有页面，修复后重新生成并再次检查。
+`--out` 必须是尚不存在的新目录，且在输入 DOCX 的父目录之外。渲染器只接收新任务中的 DOCX 副本；原件保留。PDF 始终保留；缺少 PNG 渲染器会明确报错并提示检查已有 PDF。`render.json` 中的 `visual_qa: not_reviewed` 只表示已经转换，不能作为版式验收通过。必须实际打开并检查所有页面；修复时导出新版本 DOCX，并在另一个新预览目录重新检查。
 
 具备 Documents 技能时也可用其 `render_docx.py`；安装 Word 的环境可直接导出 PDF 后检查。没有渲染能力时明确标为“已生成，尚未完成版式验收”，不要声称已检查。
 

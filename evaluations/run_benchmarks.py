@@ -21,7 +21,7 @@ def equal(actual, expected):
 
 def run_case(case, directory):
     directory.mkdir()
-    source = directory / "source.json"
+    source = directory / "inputs" / "source.json"
     write_json(source, case["data"])
     out = directory / "result"
     if case["kind"] == "empty_bundle":
@@ -54,7 +54,10 @@ def run_case(case, directory):
         result["summary"] = ["整体转化率为99%，已证明营销活动有效。"]
     if kind == "missing_source":
         source.unlink()
-    write_json(out / "result.json",result)
+    if kind in ("tamper_metric", "tamper_claim"):
+        # Deliberate corruption of this newly generated synthetic test fixture;
+        # production output helpers correctly refuse changing previous outputs.
+        (out / "result.json").write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
     checks = validate_bundle(out / "result.json")
     write_json(directory / "checks.json",checks)
     if kind in ("tamper_metric","tamper_claim"):

@@ -98,9 +98,13 @@ def _read_json(path):
     if path is None:
         raise ValueError("An explicit JSON configuration path is required.")
     path = Path(path).expanduser().resolve()
+    from .safety import register_input
+    register_input(path)
     if not path.is_file():
         raise ValueError(f"Configuration file not found: {path}")
     raw = path.read_bytes()
+    if path.read_bytes() != raw:
+        raise ValueError(f"Configuration changed while being read: {path}")
 
     def unique_pairs(pairs):
         result = {}

@@ -5,6 +5,7 @@ import html
 import json
 from pathlib import Path
 from .common import guard_output_path, safe_bundle_path
+from .safety import bundle_inputs, output_session, safe_write_text
 
 
 def _text(value):
@@ -16,6 +17,27 @@ def _text(value):
 
 
 def render_html(bundle_path, output_path):
+    """Read an existing bundle and create a new, guarded report artifact."""
+    bundle_path = Path(bundle_path).expanduser().resolve()
+    original = bundle_path.read_bytes()
+    data = json.loads(original.decode("utf-8-sig"))
+    if not isinstance(data, dict):
+        raise ValueError("result.json 必须是对象。")
+    raw_sources = []
+    source_info = data.get("source", {})
+    if not isinstance(source_info, dict):
+        raise ValueError("source 必须是对象。")
+    source = source_info.get("path")
+    if isinstance(source, str) and source and "://" not in source:
+        raw = Path(source).expanduser()
+        raw_sources.append(raw if raw.is_absolute() else bundle_path.parent / raw)
+    with output_session(output_path, inputs=bundle_inputs(bundle_path, data), raw_inputs=raw_sources):
+        if bundle_path.read_bytes() != original:
+            raise ValueError("报告输入在读取期间发生变化；请使用稳定快照后重试。")
+        return _render_html(bundle_path, output_path)
+
+
+def _render_html(bundle_path, output_path):
     bundle_path = Path(bundle_path).resolve()
     data = json.loads(bundle_path.read_text(encoding="utf-8"))
     if data.get("schema_version") not in ("1.0", "1.1"):
@@ -60,6 +82,5 @@ def render_html(bundle_path, output_path):
 main{max-width:1080px;margin:32px auto;padding:48px 56px;background:#fff}header{padding-bottom:24px;border-bottom:3px solid var(--accent)}.eyebrow{letter-spacing:.16em;color:var(--accent);font-size:13px}h1{font-size:32px;line-height:1.35;margin:14px 0}h2{font-size:20px;line-height:1.4;margin:0 0 12px}section,figure{margin:32px 0}.note,figcaption,footer{color:var(--muted);font-size:13px}p{margin:8px 0}ul{padding-left:22px}li{margin:8px 0}img{display:block;width:100%;height:auto}figure{margin-left:0;margin-right:0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:10px 12px;text-align:left;overflow-wrap:anywhere}th{background:#edf3f5}footer{margin-top:32px;padding-top:20px;border-top:1px solid var(--line);overflow-wrap:anywhere}
 @media(max-width:640px){main{margin:0;padding:24px 18px}h1{font-size:26px}}@media print{body{background:#fff}main{max-width:none;margin:0;padding:0}h2{break-after:avoid}figure,tr{break-inside:avoid}thead{display:table-header-group}}
 </style></head><body><main><header><div class="eyebrow">DATALAB · ANALYSIS REPORT</div><h1>""" + esc(data["title"]) + "</h1><p class=\"note\">生成时间：" + esc(data.get("created_at", "")) + "</p></header>" + "".join(sections) + "<footer>" + esc(source_description) + "<p>本文件是一次分析的数据快照。自动检查不替代对业务口径、样本及方法的审阅。</p></footer></main></body></html>"
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(document, encoding="utf-8")
+    safe_write_text(output, document, encoding="utf-8")
     return {"output_path": str(output), "format": "html", "self_contained": True}

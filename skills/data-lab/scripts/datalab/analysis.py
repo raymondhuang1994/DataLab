@@ -15,6 +15,7 @@ from .profile import profile_frame
 from .metrics import compute_metric, filter_frame, format_value, legacy_metric, normalize_metric
 from .quality import check_quality
 from .grouping import group_labels
+from .safety import output_session, safe_open
 
 
 def parse_dates(series, timezone="UTC"):
@@ -36,9 +37,9 @@ def metric_value(frame, metric, agg, weight=None, denominator=None):
 
 def _save_table(out, identifier, title, frame):
     path = out / "tables" / f"{identifier}.csv"
-    path.parent.mkdir(exist_ok=True)
     # Raw CSV is a machine-readable data artifact, not an executable workbook.
-    frame.to_csv(path, index=False, encoding="utf-8-sig", quoting=csv.QUOTE_NONNUMERIC)
+    with safe_open(path, encoding="utf-8-sig", newline="") as stream:
+        frame.to_csv(stream, index=False, quoting=csv.QUOTE_NONNUMERIC)
     return {"id": identifier, "title": title, "columns": [str(c) for c in frame.columns],
             "rows": json_safe(frame.values.tolist()), "source_file": f"tables/{identifier}.csv"}
 
@@ -46,9 +47,19 @@ def _save_table(out, identifier, title, frame):
 def analyze(input_path, output_dir, metric=None, group=None, date=None, agg="sum", weight=None,
             denominator=None, sheet=None, key=None, title="DataLab 数据分析报告", timezone="UTC", freq="M", charts=True,
             metric_definition=None, preferences=None, quality_rules=None, settings_provenance=None):
+    options = dict(locals())
+    inputs = []
+    for value in (settings_provenance or {}).get("files", {}).values():
+        if isinstance(value, dict) and value.get("path"):
+            inputs.append(value["path"])
+    with output_session(output_dir, inputs=inputs, raw_inputs=[input_path], directory=True):
+        return _analyze_impl(**options)
+
+
+def _analyze_impl(input_path, output_dir, metric=None, group=None, date=None, agg="sum", weight=None,
+                  denominator=None, sheet=None, key=None, title="DataLab 数据分析报告", timezone="UTC", freq="M", charts=True,
+                  metric_definition=None, preferences=None, quality_rules=None, settings_provenance=None):
     out = Path(output_dir).resolve()
-    if out.exists() and (not out.is_dir() or any(out.iterdir())):
-        raise ValueError("输出路径已有内容；请使用新目录或空目录，避免覆盖源数据和已有分析。")
     source = Path(input_path).resolve()
     original_hash = file_sha256(source)
     df = load_frame(source, sheet=sheet)
@@ -91,7 +102,6 @@ def analyze(input_path, output_dir, metric=None, group=None, date=None, agg="sum
     tables, findings, generated_charts, claims = [], [], [], []
     summary = [f"读取 {len(df):,} 条记录、{len(df.columns)} 个字段；未自动删除重复记录或异常值。"]
     numeric_rows = [[c["name"], c["stats"].get("count"), c["stats"].get("mean"), c["stats"].get("median"), c["stats"].get("min"), c["stats"].get("max")] for c in profile["columns"] if c["kind"] == "numeric"]
-    out.mkdir(parents=True, exist_ok=True)
     tables.append(_save_table(out, "profile", "字段质量概览", pd.DataFrame([[c["name"], c["dtype"], c["missing"], c["unique"]] for c in profile["columns"]], columns=["字段", "类型", "缺失数", "不同值数量"])))
     if numeric_rows:
         tables.append(_save_table(out, "numeric_summary", "数值字段概览", pd.DataFrame(numeric_rows, columns=["字段", "有效数", "均值", "中位数", "最小值", "最大值"])))
@@ -187,7 +197,7 @@ def analyze(input_path, output_dir, metric=None, group=None, date=None, agg="sum
               "settings_provenance": settings_provenance or {},
               "findings": findings, "tables": tables, "charts": [c for c in generated_charts if c],
               "limitations": list(dict.fromkeys(limitations)),
-              "methodology": ["从指定本地文件读取数据；源文件未修改。", f"指标口径：{json.dumps(metric_spec, ensure_ascii=False)}", "保留缺失类别；不自动去重、不删除异常值；每张图均关联结果数据表。"],
+              "methodology": ["源文件只读打开；运行前后指纹核对见本次 audit/file-safety 记录。", f"指标口径：{json.dumps(metric_spec, ensure_ascii=False)}", "保留缺失类别；不自动去重、不删除异常值；每张图均关联结果数据表。"],
               "validation": {"status": "needs_review", "checks": checks, "note": "自动检查只覆盖计算与文件一致性，不等于业务和统计方法已完成独立审阅。"},
               "runtime": {"datalab": __version__, "python": sys.version.split()[0], "packages": {p: importlib.metadata.version(p) for p in ("pandas", "numpy")}}}
     write_json(out / "config.json", config)

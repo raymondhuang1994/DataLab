@@ -54,9 +54,9 @@ def json_safe(value):
 
 def write_json(path, value):
     path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(json_safe(value), ensure_ascii=False, indent=2, allow_nan=False)
-    path.write_text(text + "\n", encoding="utf-8")
+    from .safety import safe_write_text
+    safe_write_text(path, text + "\n", encoding="utf-8")
     return path
 
 
@@ -104,4 +104,10 @@ def guard_output_path(input_path, data, output_path):
                 pass
         if identical:
             raise ValueError(f"输出不能覆盖输入文件、源数据或成果资源文件: {resource}")
+    from .safety import current_session
+    session = current_session()
+    if output.exists() and (session is None or output not in session.owned):
+        raise ValueError(f"输出已有文件，不能覆盖；请使用新文件名: {output}")
+    if session is not None:
+        output = session.path(output_path)
     return output

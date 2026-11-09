@@ -1,4 +1,4 @@
-# DataLab｜数据科学工作台 · v0.2
+# DataLab｜数据科学工作台 · v0.3
 
 [GitHub 仓库](https://github.com/raymondhuang1994/DataLab) · [下载发行包](https://github.com/raymondhuang1994/DataLab/releases) · [跨平台测试](https://github.com/raymondhuang1994/DataLab/actions)
 
@@ -16,6 +16,7 @@
 - **统一指标**：比例、加权均值、行数、非空计数和去重人数使用共享定义；过滤后重新计算。实时看板全量计算，明细分页不改变指标覆盖范围。
 - **项目与偏好**：显式 JSON 保存业务口径、数据质量规则、时区，以及展示精度、颜色、Word 页面和字体。记录实际生效值、字段来源与配置指纹。
 - **分层验证**：独立复算支持的总体/分组/周期指标，核对结构化数字声明；计算检查与业务文字/版式审阅分别记录。
+- **文件保护**：内置工具拒绝覆盖已有文件，原始数据目录禁止写入；分析/建模使用全新目录，导出使用新文件名，保存输入前后指纹和已登记新产物审计。
 
 原有工作流保留为主 Skill 的按需参考资料，避免必须一次加载所有说明。一个 `data-lab` 入口负责识别用户目标，执行工具是辅助，不替代模型对问题和证据的判断。
 
@@ -33,23 +34,29 @@
 
 无插件运行环境时，也可以直接运行 `skills/data-lab/scripts/run.py --help`。`examples/` 提供明确标注为合成数据的样例。
 
+所有原件、配置和旧成果保持只读；将成果写到原始数据目录之外。已有成果需要修订时创建新版本，不覆盖旧文件。v0.2 脚本的路径迁移见 [v0.3 使用与升级](docs/UPGRADE-0.3.md)，完整保护规则见 [文件只读与新成果写入](docs/READ-ONLY.md)。
+
 ## 范围与边界
 
 这是分析技能和执行助手，不是托管 BI 服务。实时看板从本地文件读取变化，没有预装数据库凭证或无人值守数据采集。复杂因果推断、任意机器学习模型、实时流处理并非内置功能。模型结果不保证优于基线。
 
 不含 PPT 导出和跨设备同步。Word 导出与视觉审阅分开记录。数据来源、模型假设和业务因果仍需要判断；自动验证通过只代表所列检查通过。
 
+文件保护属于 `software_guards`，只约束已接入的内置写入路径，不是操作系统沙箱。任意额外 Python/SQL、库或外部程序需要宿主权限约束才能强制禁止写入原件。DataLab 不自动修改原件 ACL/权限，输入哈希也不能阻止或归因外部修改。
+
 ## 开发和测试
+
+在新建的独立开发环境中执行；基准结果和发布包每次使用新目录：
 
 ```text
 python -m pip install -e ".[dev,parquet,interactive]"
 python -m pytest -q
-python evaluations/run_benchmarks.py --out ../work/benchmark-run
+python evaluations/run_benchmarks.py --out ../work/benchmark-run-001
 python tools/check_package.py
-python tools/package.py --out ../outputs
+python tools/package.py --out ../release-0.3.0-001
 ```
 
-GitHub Actions 的 Windows/macOS × Python3.11/3.12/3.13 六组检查已全部通过，本地229项测试通过。实际执行结果和验收边界见 [验证记录](docs/VALIDATION.md)。
+CI 覆盖 Windows/macOS × Python3.11/3.12/3.13。各版本实际执行结果和验收边界见 [验证记录](docs/VALIDATION.md)；旧版本通过记录不代替新版本或实际宿主权限验收。
 
 `evaluations/` 包含28个业务场景的计算与验证任务，以及3份独立代理任务包。数据均为合成数据。自动任务评分与代理实际分析能力分开记录，不以单元测试数量代替专业分析质量。
 

@@ -23,19 +23,26 @@ Use the current question, data and requested outcome to select only relevant gui
 | Validate a conclusion, calculation, chart or result bundle | [Validation](references/validation.md) |
 | Reuse business terms, metric formulas and table knowledge | [Business context](references/context.md) |
 | Reuse metric definitions or project/user settings across reports and dashboards | [Project and preference settings](references/settings.md) |
+| Output paths, existing files, custom scripts or stronger execution isolation | [Read-only inputs and safe outputs](references/safety.md) |
 
 ## Execute in the current host
 
 Find this skill's directory and use package-relative paths. Do not assume a drive letter, home folder, shell, current working directory or a tool named after Claude. Read [Host and OS compatibility](references/platforms.md) when tools or installation are unclear.
 
-Use existing authorized file, code-execution and data-connection tools. If a Python runtime is available, run `scripts/run.py doctor`. The bundled helpers require Python 3.11+; use an existing suitable environment first. A writable project environment can be prepared explicitly with `scripts/bootstrap.py --venv <path>`. Never treat installing skill text as installing Python dependencies or database credentials.
+Use existing authorized file, code-execution and data-connection tools. If a Python runtime is available, run `scripts/run.py doctor`. The bundled helpers require Python 3.11+; use an existing suitable environment without changing its dependencies. If dependencies are missing, prepare a new environment explicitly with `scripts/bootstrap.py --venv <new-path>`. Never treat installing skill text as installing Python dependencies or database credentials.
 
 If code execution is unavailable, use an available authorized execution tool/MCP service. If none exists, give executable code and explain that results have not been computed. Do not fabricate an analysis or show illustrative numbers as findings. A ChatGPT web session does not automatically gain access to the user's local filesystem or localhost server.
+
+## Preserve existing files
+
+Treat files present before this task as read-only: original data, supplied context/configuration, code and existing results. Never edit, replace, rename, delete or change permissions on them. Create a new task directory outside every original data directory; keep derived data and custom code there. Standalone exports may add a new filename to an existing results directory, but must not replace a previous file. An empty existing directory is not a new analysis/model run directory. If the requested path conflicts, choose a new versioned path and report it.
+
+Read [Read-only inputs and safe outputs](references/safety.md) before custom code or revising prior results. The bundled `software_guards` apply to their own write paths; they do not sandbox arbitrary Python, SQL or other tools. Use a working copy for custom transformations. Strong prevention of writes to originals requires host-enforced read-only input access for the process and its children; do not claim this protection unless the host actually provides it, and do not change original-file ACLs or permissions to simulate it. Stop a blocked write instead of bypassing protection.
 
 ## Analysis decisions that matter
 
 - Establish what one row represents, the observation unit, time range and requested metric. Ask only when a missing definition materially changes the answer; continue independent work such as profiling.
-- Keep the original data unchanged. Explain cleaning, exclusion, aggregation and sampling decisions. Missing is not zero. Do not infer percentage, currency, date units or causal meaning from a field name alone.
+- Explain cleaning, exclusion, aggregation and sampling decisions; save cleaned data as a new derived file. Missing is not zero. Do not infer percentage, currency, date units or causal meaning from a field name alone.
 - When the user supplies a project configuration, select its registered metric explicitly. Use the same definition for analysis and dashboards; recalculate ratios and distinct counts after filtering. Keep row counts, nonmissing counts and distinct entities separate. Inspect effective settings with `config`; never silently replace business definitions with presentation preferences.
 - Use actual Python/SQL execution for material calculations. Preserve the query/code, selected inputs, definitions and result tables. Check joins, denominators, time alignment and missingness where relevant.
 - Select models using training data. Hold out evaluation data before fitting preprocessing or selecting parameters. Evaluate against a baseline. Read the modeling reference before predictive work.

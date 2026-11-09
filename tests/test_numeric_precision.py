@@ -10,7 +10,8 @@ def test_integer_format_retains_units_above_float_precision():
 
 
 def test_independent_integer_sum_detects_one_unit_tampering(tmp_path):
-    source=tmp_path / "large.csv"
+    (tmp_path / "inputs").mkdir()
+    source=tmp_path / "inputs/large.csv"
     source.write_text("amount\n9007199254740991\n9007199254740991\n9007199254740991\n",encoding="utf-8")
     out=tmp_path / "result"
     analyze(source,out,metric="amount",charts=False)

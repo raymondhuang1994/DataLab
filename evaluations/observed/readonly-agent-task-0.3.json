@@ -1,0 +1,33 @@
+{
+  "version": "0.3.0",
+  "synthetic_data": true,
+  "task": "channel cleanup and conversion analysis with preexisting original files and historical Word",
+  "preexisting_files_checked": 3,
+  "preexisting_files_unchanged": true,
+  "input_rows": 7,
+  "deduplicated_rows": 6,
+  "valid_rows": 5,
+  "complete_pair_rows": 4,
+  "observed": {
+    "overall": {
+      "orders": 28,
+      "visits": 350,
+      "rate": 0.08
+    },
+    "Search": {
+      "orders": 18,
+      "visits": 150,
+      "rate": 0.12
+    },
+    "Social": {
+      "orders": 10,
+      "visits": 200,
+      "rate": 0.05
+    }
+  },
+  "limitations": [
+    "The missing denominator prevents an exact rate for all valid rows overall and for Search.",
+    "Word preview had missing Chinese glyphs; layout not visually accepted.",
+    "One independent agent task is not a general success rate."
+  ]
+}

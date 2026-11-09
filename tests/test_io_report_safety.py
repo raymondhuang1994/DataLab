@@ -67,7 +67,8 @@ def test_malformed_quoted_record_is_rejected(tmp_path):
 def bundle_fixture(tmp_path, relative_source=False):
     folder = tmp_path / "bundle"
     folder.mkdir()
-    source = folder / "source.csv" if relative_source else tmp_path / "source.csv"
+    source = folder / "source.csv" if relative_source else tmp_path / "inputs" / "source.csv"
+    source.parent.mkdir(exist_ok=True)
     source.write_text("sales\n10\n", encoding="utf-8")
     table = folder / "tables" / "summary.csv"
     table.parent.mkdir()
@@ -93,16 +94,16 @@ def bundle_fixture(tmp_path, relative_source=False):
 def test_report_refuses_to_overwrite_every_declared_resource(tmp_path, resource):
     bundle, paths = bundle_fixture(tmp_path)
     originals = {name: path.read_bytes() for name, path in paths.items()}
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         render_html(bundle, paths[resource])
     assert {name: path.read_bytes() for name, path in paths.items()} == originals
 
 
 def test_report_protects_relative_source_and_normalized_alias(tmp_path):
     bundle, paths = bundle_fixture(tmp_path, relative_source=True)
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         render_html(bundle, paths["source"])
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         render_html(bundle, bundle.parent / "unused" / ".." / "tables" / "summary.csv")
 
 
@@ -114,12 +115,12 @@ def test_report_protects_hardlink_alias(tmp_path):
     except OSError as exc:
         pytest.skip(f"Hardlinks are unavailable on this test filesystem: {exc}")
     before = paths["source"].read_bytes()
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         render_html(bundle, alias)
     assert paths["source"].read_bytes() == before
 
 
-def test_report_can_write_external_html_and_regenerate_report(tmp_path):
+def test_report_can_write_new_external_html_but_cannot_replace_old_report(tmp_path):
     bundle, paths = bundle_fixture(tmp_path)
     originals = {name: path.read_bytes() for name, path in paths.items()}
     output = tmp_path / "outside" / "review.html"
@@ -130,7 +131,8 @@ def test_report_can_write_external_html_and_regenerate_report(tmp_path):
     assert {name: path.read_bytes() for name, path in paths.items()} == originals
     inside = bundle.parent / "report.html"
     render_html(bundle, inside)
-    render_html(bundle, inside)
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
+        render_html(bundle, inside)
     assert inside.read_text(encoding="utf-8") == document
 
 
@@ -138,7 +140,7 @@ def test_report_can_write_external_html_and_regenerate_report(tmp_path):
 def test_word_uses_shared_guard_before_output_creation(tmp_path, resource):
     bundle, paths = bundle_fixture(tmp_path)
     originals = {name: path.read_bytes() for name, path in paths.items()}
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         export_word(bundle, paths[resource])
     assert {name: path.read_bytes() for name, path in paths.items()} == originals
 
@@ -151,7 +153,7 @@ def test_word_refuses_docx_hardlink_to_bundle_resource(tmp_path):
     except OSError as exc:
         pytest.skip(f"Hardlinks are unavailable on this test filesystem: {exc}")
     original = paths["source"].read_bytes()
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         export_word(bundle, alias)
     assert paths["source"].read_bytes() == original
 
@@ -168,7 +170,7 @@ def test_compare_destination_cannot_overwrite_input_or_alias(tmp_path):
     source.write_text("group,value\nA,1\nA,2\nB,4\nB,5\n", encoding="utf-8")
     original = source.read_bytes()
     args = _compare_args(source, source)
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         args.func(args)
     assert source.read_bytes() == original
     alias = tmp_path / "results.json"
@@ -177,13 +179,14 @@ def test_compare_destination_cannot_overwrite_input_or_alias(tmp_path):
     except OSError as exc:
         pytest.skip(f"Hardlinks are unavailable on this test filesystem: {exc}")
     args = _compare_args(source, alias)
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         args.func(args)
     assert source.read_bytes() == original
 
 
 def test_compare_can_export_results_without_changing_input(tmp_path):
-    source = tmp_path / "experiment.csv"
+    source = tmp_path / "inputs" / "experiment.csv"
+    source.parent.mkdir()
     source.write_text("group,value\nA,1\nA,2\nB,4\nB,5\n", encoding="utf-8")
     original = source.read_bytes()
     output = tmp_path / "results" / "comparison.json"

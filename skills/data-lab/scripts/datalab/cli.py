@@ -9,11 +9,27 @@ from pathlib import Path
 
 
 def doctor():
+    import os
+    import tempfile
+    # A fresh disposable cache avoids changing a prior user's font cache.
+    with tempfile.TemporaryDirectory(prefix="datalab-doctor-") as cache:
+        previous = {key: os.environ.get(key) for key in ("MPLCONFIGDIR", "XDG_CACHE_HOME")}
+        os.environ.update(MPLCONFIGDIR=cache, XDG_CACHE_HOME=cache)
+        try:
+            return _doctor_impl()
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
+
+def _doctor_impl():
     import importlib
     import shutil
     import os
     import tempfile
-    os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "datalab-mpl"))
     required = ["pandas", "numpy", "matplotlib", "openpyxl", "docx", "PIL", "scipy", "sklearn"]
     optional = ["pyarrow", "plotly"]
     capabilities = {m: importlib.util.find_spec(m) is not None for m in required + optional}
@@ -64,7 +80,7 @@ def parser(command=None):
     analyze_parser.add_argument("--currency")
     analyze_parser.add_argument("--precision", type=int)
     analyze_parser.add_argument("--no-charts", action="store_true")
-    def run_analysis(args):
+    def perform_analysis(args):
         from .analysis import analyze
         from .settings import resolve_settings
         from .validation import validate_bundle
@@ -82,6 +98,13 @@ def parser(command=None):
         write_json(Path(args.out) / "checks.json", verification)
         render_html(bundle, Path(args.out) / "report.html")
         return {"output_dir": str(Path(args.out).resolve()), "status": verification["status"], "checks_status": verification["checks_status"], "summary": result["summary"], "limitations": result["limitations"]}
+    def run_analysis(args):
+        from .safety import output_session
+        inputs = [p for p in (args.project, args.preferences) if p is not None]
+        with output_session(args.out, inputs=inputs, raw_inputs=[args.input], directory=True) as session:
+            result = perform_analysis(args)
+        result["file_safety"] = {"protection": "software_guards", "audit": str(session.audit_path)}
+        return result
     analyze_parser.set_defaults(func=run_analysis)
     report = sub.add_parser("report", help="从 result.json 重新生成便携 HTML 报告")
     report.add_argument("--bundle", required=True); report.add_argument("--out", required=True)
@@ -95,11 +118,23 @@ def parser(command=None):
     def run_validate(args):
         from .validation import validate_bundle
         from .common import write_json
-        result = validate_bundle(args.bundle, verify_source=not args.no_source)
-        if args.out:
-            from .common import guard_output_path
-            bundle_path = Path(args.bundle).resolve()
-            guard_output_path(bundle_path, json.loads(bundle_path.read_text(encoding="utf-8")), args.out)
+        if not args.out:
+            return validate_bundle(args.bundle, verify_source=not args.no_source)
+        from .common import guard_output_path
+        from .safety import bundle_inputs, output_session
+        bundle_path = Path(args.bundle).resolve()
+        original = bundle_path.read_bytes()
+        data = json.loads(original.decode("utf-8-sig"))
+        guard_output_path(bundle_path, data, args.out)
+        raw = data.get("source", {}).get("path")
+        raw_paths = []
+        if raw and "://" not in raw:
+            raw_path = Path(raw).expanduser()
+            raw_paths = [raw_path if raw_path.is_absolute() else bundle_path.parent / raw_path]
+        with output_session(args.out, inputs=bundle_inputs(bundle_path, data), raw_inputs=raw_paths):
+            if bundle_path.read_bytes() != original:
+                raise ValueError("验证输入在读取期间发生变化。")
+            result = validate_bundle(args.bundle, verify_source=not args.no_source)
             write_json(args.out, result)
         return result
     validate.set_defaults(func=run_validate)
@@ -108,13 +143,18 @@ def parser(command=None):
     replay.add_argument("--input", help="原文件移动后的新路径")
     def run_replay(args):
         from .analysis import analyze
-        config = json.loads(Path(args.config).read_text(encoding="utf-8"))
+        from .safety import output_session
+        config_bytes = Path(args.config).read_bytes()
+        config = json.loads(config_bytes.decode("utf-8-sig"))
         if args.input:
             config["input_path"] = args.input
         allowed = {"input_path", "metric", "group", "date", "agg", "weight", "denominator", "sheet", "key", "title", "timezone", "freq", "charts", "metric_definition", "preferences", "quality_rules", "settings_provenance"}
         if set(config) - allowed:
             raise ValueError("config.json 含不支持的字段。")
-        result = analyze(output_dir=args.out, **config)
+        with output_session(args.out, inputs=[args.config], raw_inputs=[config["input_path"]], directory=True):
+            if Path(args.config).read_bytes() != config_bytes:
+                raise ValueError("复算配置在读取期间发生变化。")
+            result = analyze(output_dir=args.out, **config)
         return {"output_dir": args.out, "summary": result["summary"]}
     replay.set_defaults(func=run_replay)
     config = sub.add_parser("config", help="校验配置、展示生效设置与来源（不会修改文件）")

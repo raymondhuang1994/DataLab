@@ -4,6 +4,7 @@ import numpy as np
 from scipy import stats
 from .common import guard_output_path, json_safe, write_json
 from .io import load_frame
+from .safety import output_session
 
 
 def compare_groups(input_path, group, metric, method="welch", sheet=None, alpha=.05):
@@ -54,8 +55,9 @@ def add_stats_parser(subparsers):
     parser.add_argument("--method", choices=["welch", "mannwhitney"], default="welch")
     parser.add_argument("--sheet"); parser.add_argument("--alpha", type=float, default=.05)
     def run(args):
-        output = guard_output_path(args.input, {}, args.out)
-        result = compare_groups(args.input, args.group, args.metric, args.method, args.sheet, args.alpha)
-        write_json(output, result)
-        return result
+        with output_session(args.out, raw_inputs=[args.input]):
+            output = guard_output_path(args.input, {}, args.out)
+            result = compare_groups(args.input, args.group, args.metric, args.method, args.sheet, args.alpha)
+            write_json(output, result)
+            return result
     parser.set_defaults(func=run)

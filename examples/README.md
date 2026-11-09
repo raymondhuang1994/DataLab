@@ -7,3 +7,5 @@
 - `series.csv`：180 个连续日的虚构单变量序列，用于滞后预测/回测演示。
 
 这些样例用于了解输出和验证执行流程，不代表真实数据上的模型效果。
+
+需要重新生成时，运行 `python examples/generate_samples.py --out ../synthetic-samples-001`，输出目录必须尚不存在。生成器不会原地重写这里的样例文件。

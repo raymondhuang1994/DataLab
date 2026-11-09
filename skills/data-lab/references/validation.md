@@ -6,7 +6,9 @@ Adapted from upstream validate-data. A programmatic pass is evidence about the c
 
 Verify source version, time range, grain, population and metric definitions. Check important nulls, duplicate entities, join cardinality, unmatched records, denominator consistency, weighting and partial periods. Do not treat all negative values or percentages outside 0–100 as errors without knowing the metric.
 
-Independently recompute key totals or trace sample records. Reconcile additive segments; explain legitimate overlap. In v0.2, `validate` accepts result schema 1.0/1.1 and checks the required title, source metadata and actual content; an empty version marker is invalid. It checks JSON/CSV row widths and values, referenced image/table paths, source SHA-256, source shape and stability while reading.
+Independently recompute key totals or trace sample records. Reconcile additive segments; explain legitimate overlap. `validate` accepts result schema 1.0/1.1 and checks the required title, source metadata and actual content; an empty version marker is invalid. It checks JSON/CSV row widths and values, referenced image/table paths, source SHA-256, source shape and stability while reading.
+
+Keep original data and previous bundles unchanged during review. `validate` without `--out` prints the result only. To retain a new review, use a new filename such as `checks-review-001.json`; `analyze` has already created `checks.json`, so do not target it again. If evidence or narrative needs correction, revise a complete copy in a new task directory and validate that version. See [Read-only inputs and safe outputs](safety.md).
 
 When the original source is available, the validator independently implements the declared filters and recomputes `sum`, `mean`, `median`, `ratio`, `weighted_mean`, `count_rows`, `count_nonmissing` and `count_distinct`. Legacy `count` is interpreted according to whether a column was supplied. Ratios and weighted means use jointly valid pairs; undefined denominators remain null. Declared `by_group` and `by_period` results, record counts, timezone grouping and missing periods are checked against the source, even if JSON and CSV were altered together. A profile-only report has no business metric to recheck.
 
@@ -41,6 +43,8 @@ A claim's text matching its evidence does not independently validate an arbitrar
 `status` is **`failed` or `needs_review`**, never automatic `ready`. `checks_status` is `passed`, `warning` or `failed` for the checks actually executed. A successfully checked report therefore normally returns `status="needs_review", checks_status="passed"`.
 
 `coverage` separately reports `source`, `calculations`, `claims`, `narrative` and `visual`. Narrative and visual review remain `not_checked` by this CLI. Unavailable sources yield a warning; intentionally disabling source checks leaves source/calculation coverage explicitly unchecked. Retain that distinction when reporting validation to the user.
+
+File-protection audits under `audit/file-safety-*.json` answer a different question: whether registered inputs changed and which new artifacts a managed session recorded. Their `completed` status does not certify analysis, and a matching source hash does not prove an OS sandbox prevented writes. Unavailable inputs cannot be checked. Do not merge these records into a single “fully safe/fully verified” claim.
 
 ## Statistical and narrative checks
 

@@ -25,7 +25,8 @@ def _bootstrap(path):
 @pytest.mark.parametrize("extension", ["csv", "xlsx", "json", "parquet"])
 def test_static_export_supported_formats_and_source_hash(tmp_path, extension):
     frame = pd.DataFrame({"date": ["2026-01-01", "2026-01-02"], "region": ["华东", "华南"], "sales": [10, 20]})
-    source = tmp_path / f"source.{extension}"
+    source = tmp_path / 'inputs' / f"source.{extension}"
+    source.parent.mkdir(exist_ok=True)
     if extension == "csv":
         frame.to_csv(source, index=False)
     elif extension == "xlsx":
@@ -50,7 +51,8 @@ def test_static_export_supported_formats_and_source_hash(tmp_path, extension):
 
 def test_static_export_escapes_script_and_title_injection(tmp_path):
     attack = '</script><script>globalThis.pwned=true</script><img src=x onerror=alert(1)>'
-    source = tmp_path / "xss.json"
+    source = tmp_path / 'inputs' / "xss.json"
+    source.parent.mkdir(exist_ok=True)
     source.write_text(json.dumps([{"label": attack, "value": 1, "literal": "__PAGE_TITLE__ __SCRIPT_NONCE__"}]), encoding="utf-8")
     output = tmp_path / "safe.html"
     build_dashboard(source, output, metric="value", title=attack)
@@ -65,7 +67,8 @@ def test_static_export_escapes_script_and_title_injection(tmp_path):
 
 
 def test_rate_defaults_and_explicit_aggregation_and_row_limit(tmp_path):
-    source = tmp_path / "rates.csv"
+    source = tmp_path / 'inputs' / "rates.csv"
+    source.parent.mkdir(exist_ok=True)
     pd.DataFrame({"date": ["2026-01-01", "2026-01-02"], "conversion_rate": [.1, .2]}).to_csv(source, index=False)
     output = tmp_path / "rate.html"
     with pytest.raises(ValueError, match="不会截取"):
@@ -77,15 +80,21 @@ def test_rate_defaults_and_explicit_aggregation_and_row_limit(tmp_path):
     assert bootstrap["data"]["columns"][1]["rate"] is True
     assert result["rows_loaded"] == 2 and result["rows_total"] == 2 and result["truncated"] is False
     assert "简单平均" in html and "分子、分母" in html
-    build_dashboard(source, output, metric="conversion_rate", agg="count")
-    assert _bootstrap(output)[0]["data"]["defaults"]["agg"] == "count_nonmissing"
+    original = output.read_bytes()
+    with pytest.raises(ValueError, match="不能覆盖"):
+        build_dashboard(source, output, metric="conversion_rate", agg="count")
+    assert output.read_bytes() == original
+    count_output = tmp_path / "count.html"
+    build_dashboard(source, count_output, metric="conversion_rate", agg="count")
+    assert _bootstrap(count_output)[0]["data"]["defaults"]["agg"] == "count_nonmissing"
 
 
 def test_source_is_not_overwritten_and_invalid_configuration_fails(tmp_path):
-    source = tmp_path / "source.csv"
+    source = tmp_path / 'inputs' / "source.csv"
+    source.parent.mkdir(exist_ok=True)
     source.write_text("sales\n10\n", encoding="utf-8")
     original = source.read_bytes()
-    with pytest.raises(ValueError, match="不能覆盖"):
+    with pytest.raises(ValueError, match="不能覆盖|原始数据目录"):
         build_dashboard(source, source)
     assert source.read_bytes() == original
     with pytest.raises(ValueError, match="Unknown metric"):
@@ -95,7 +104,8 @@ def test_source_is_not_overwritten_and_invalid_configuration_fails(tmp_path):
 
 
 def test_dashboard_refuses_hardlink_to_source(tmp_path):
-    source = tmp_path / "source.csv"
+    source = tmp_path / 'inputs' / "source.csv"
+    source.parent.mkdir(exist_ok=True)
     source.write_text("sales\n10\n", encoding="utf-8")
     output = tmp_path / "dashboard.html"
     try:
@@ -138,7 +148,8 @@ def wait_for(base, predicate, timeout=9):
 
 
 def test_live_server_polls_modified_source_retains_last_good_and_recovers(tmp_path):
-    source = tmp_path / "sales.csv"
+    source = tmp_path / 'inputs' / "sales.csv"
+    source.parent.mkdir(exist_ok=True)
     source.write_text("date,sales\n2026-01-01,10\n", encoding="utf-8")
     with running_server(source, date_column="date", metric="sales") as (server, base):
         initial = fetch(base)
@@ -166,7 +177,8 @@ def test_live_server_polls_modified_source_retains_last_good_and_recovers(tmp_pa
 
 
 def test_server_limits_routes_origin_and_bind_address(tmp_path):
-    source = tmp_path / "source.csv"
+    source = tmp_path / 'inputs' / "source.csv"
+    source.parent.mkdir(exist_ok=True)
     source.write_text("sales\n1\n", encoding="utf-8")
     with pytest.raises(ValueError, match="loopback"):
         create_dashboard_server(source, host="0.0.0.0", port=0)
@@ -184,7 +196,8 @@ def test_server_limits_routes_origin_and_bind_address(tmp_path):
 
 
 def test_unchanged_source_does_not_claim_new_success_and_minimum_interval(tmp_path):
-    source = tmp_path / "source.csv"
+    source = tmp_path / 'inputs' / "source.csv"
+    source.parent.mkdir(exist_ok=True)
     source.write_text("sales\n1\n", encoding="utf-8")
     store = SourceStore(source, interval=.1)
     initial = store.snapshot()

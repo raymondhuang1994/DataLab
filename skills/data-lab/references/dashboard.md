@@ -2,6 +2,8 @@
 
 `dashboard` 导出可独立打开的离线 HTML；`serve` 在当前终端启动本机服务，轮询指定文件。两者均不依赖 CDN 或云端上传。先确认指标口径、分组、时区和趋势周期。
 
+离线 HTML 必须写到原始数据目录之外的新文件；再次导出使用新文件名。已有 HTML、项目和偏好配置均不能覆盖。`serve` 只读源文件，刷新数据应由另一个明确授权的流程负责；它不是 DataLab 修改原数据的例外。详见 [只读输入与安全输出](safety.md)。
+
 ## 使用项目中注册的指标
 
 报告与看板应选择同一项目 JSON 中的 `metric-id`，而不是分别手写转化率或平均值。例如项目包含：
@@ -23,8 +25,8 @@
 ```
 
 ```text
-python scripts/run.py dashboard --input sales.csv --project project.json --metric-id conversion --preferences preferences.json --out dashboard.html
-python scripts/run.py serve --input sales.csv --project project.json --metric-id conversion --preferences preferences.json --port 8765
+python scripts/run.py dashboard --input inputs/sales.csv --project config/project.json --metric-id conversion --preferences config/preferences.json --out results/dashboard-001.html
+python scripts/run.py serve --input inputs/sales.csv --project config/project.json --metric-id conversion --preferences config/preferences.json --port 8765
 ```
 
 命令相对于 Skill 目录执行；使用当前环境的解释器。多表 XLSX 要指定 `--sheet`。CSV/TSV、XLSX、JSON对象数组、JSONL/NDJSON及Parquet使用同一文件读取器；Parquet需可选依赖。
@@ -38,8 +40,8 @@ python scripts/run.py serve --input sales.csv --project project.json --metric-id
 ## 兼容未注册的单字段分析
 
 ```text
-python scripts/run.py dashboard --input sales.csv --metric revenue --group region --date date --agg sum --out revenue.html
-python scripts/run.py serve --input sales.csv --metric revenue --group region --date date --agg sum --interval 5 --port 8765
+python scripts/run.py dashboard --input inputs/sales.csv --metric revenue --group region --date date --agg sum --out results/revenue-001.html
+python scripts/run.py serve --input inputs/sales.csv --metric revenue --group region --date date --agg sum --interval 5 --port 8765
 ```
 
 旧 `count` 在指定 `--metric` 时映射为非空值计数；不指定字段时映射为行数，与分析模块一致。明确写 `count_rows` 时不传字段，去重使用 `count_distinct`。未注册字段仍可切换，文本字段只适合计数/去重。率名称的旧默认仍是未加权平均并明确提示；整体率必须改用注册的分子/分母指标。
@@ -68,6 +70,8 @@ Python使用与分析报告相同的日期解析来生成规范日键/周期键�
 服务仅绑定 `127.0.0.1` / `localhost`，默认端口8765；`--port 0`可自动选择空闲端口。最短轮询2秒，默认5秒；文件检查和浏览器状态查询各需时间，变更通常在一到两个周期内显示。`Ctrl+C`或关闭进程会停止，不安装后台服务。
 
 “最近检查”“最近成功读取”“数据变更”分别记录不同事件。源文件格式损坏、删除、字段不符合指标时，保留上一份完整可用快照并标记过期；恢复后继续更新。读取前后指纹核对，避免读取一半写入的文件。浏览器连接失败会显示提示。
+
+长驻服务预期会观察到外部更新；源文件指纹变化本身不能证明是 DataLab 写入，也不应被描述为整个服务生命周期内源文件固定不变。这里的只读承诺指 DataLab 只读取源文件。需要防止任意代码写入时，由宿主为服务进程提供只读输入权限。
 
 GET `/api/data`只读取指定源快照；POST `/api/query`仅接受指标/聚合、分组、类别、日期起止、页码这些控件，验证本机Host/Origin、JSON类型、体积和字段白名单。没有任意路径、任意查询或执行代码接口。
 

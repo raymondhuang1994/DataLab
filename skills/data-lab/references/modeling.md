@@ -16,13 +16,13 @@
 以下命令在包含 `datalab` 的脚本目录或已安装的 DataLab 环境执行。
 
 ```text
-python -m datalab model --input sales.csv --out results/regression --target revenue --features visits price channel --task regression
-python -m datalab model --input customers.csv --out results/classification --target churn --features tenure spend region --task classification
-python -m datalab model --input observations.csv --out results/time-evaluation --target outcome --features feature_a feature_b --task regression --time-column date
-python -m datalab model --input monthly.csv --out results/forecast --target revenue --task forecast --time-column month --forecast-lags 1 2 3 12 --forecast-horizon 6
+python -m datalab model --input inputs/sales.csv --out results/regression-001 --target revenue --features visits price channel --task regression
+python -m datalab model --input inputs/customers.csv --out results/classification-001 --target churn --features tenure spend region --task classification
+python -m datalab model --input inputs/observations.csv --out results/time-evaluation-001 --target outcome --features feature_a feature_b --task regression --time-column date
+python -m datalab model --input inputs/monthly.csv --out results/forecast-001 --target revenue --task forecast --time-column month --forecast-lags 1 2 3 12 --forecast-horizon 6
 ```
 
-`--sheet` 可指定 Excel 工作表名称或从 0 开始的索引。目录必须为空，避免覆盖旧成果。默认比较 `linear` 和 `random_forest`；可用 `--model-families linear` 只运行线性候选。默认留出比例为 20%，训练交叉验证最多 5 折，随机种子为 42。
+`--sheet` 可指定 Excel 工作表名称或从 0 开始的索引。`--out` 必须是原始数据目录之外、尚不存在的新目录；已有空目录也拒绝。再次训练或修订配置时创建新任务目录，原数据和已有成果只读。详见 [只读输入与安全输出](safety.md)。默认比较 `linear` 和 `random_forest`；可用 `--model-families linear` 只运行线性候选。默认留出比例为 20%，训练交叉验证最多 5 折，随机种子为 42。
 
 `auto` 将文字/布尔目标或只有两个不同值的数值目标解释为分类。只有 3–20 个不同整数值的数值目标有分类/回归歧义，会要求明确任务；其他数值目标解释为回归。数值编码的多分类目标应明确写 `--task classification`；只有两个取值的连续指标应明确写 `--task regression`。正式分析建议始终明确任务类型。
 
@@ -64,7 +64,7 @@ python -m datalab model --input monthly.csv --out results/forecast --target reve
 不自动复制原始数据，不保存或加载 pickle/joblib 模型。换机器复现时，在独立环境安装报告列出的依赖版本，然后提供原始数据路径与新输出目录：
 
 ```text
-python reproduce.py --input original.csv --out reproduced
+python reproduce.py --input inputs/original.csv --out results/reproduced-001
 ```
 
 复现需要兼容 Python 和已安装依赖，不代表运行环境、凭证或文件已经跨设备同步。随机森林不纯度重要性可能偏向高基数特征；线性系数来自标准化/编码后的特征空间；二者均不能当成因果效应。

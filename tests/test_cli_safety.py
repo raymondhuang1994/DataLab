@@ -5,7 +5,8 @@ from datalab.cli import main
 
 
 def test_validation_output_cannot_replace_bundle_or_source(tmp_path):
-    source = tmp_path / "data.csv"
+    (tmp_path / "inputs").mkdir()
+    source = tmp_path / "inputs/data.csv"
     source.write_text("x\n3\n", encoding="utf-8")
     out = tmp_path / "analysis"
     analyze(source, out, metric="x", charts=False)

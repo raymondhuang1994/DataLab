@@ -15,7 +15,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
-import tempfile
+from datalab.safety import cache_directory, current_session, output_session, safe_write_bytes, safe_write_text
 
 
 def find_soffice(override: str | None = None) -> str:
@@ -56,6 +56,8 @@ def run_command(arguments: list[str], timeout: int) -> None:
 
 def render_word(input_path: Path, output_dir: Path, soffice: str,
                 make_png: bool = False, dpi: int = 150, timeout: int = 180) -> dict:
+    requested_input = input_path.expanduser().absolute()
+    requested_output = output_dir.expanduser().absolute()
     input_path = input_path.expanduser().resolve()
     output_dir = output_dir.expanduser().resolve()
     if not input_path.is_file() or input_path.suffix.lower() != ".docx":
@@ -66,32 +68,51 @@ def render_word(input_path: Path, output_dir: Path, soffice: str,
         raise ValueError("--dpi must be between 72 and 300.")
     if timeout < 1:
         raise ValueError("--timeout must be positive.")
-    output_dir.mkdir(parents=True, exist_ok=False)
+    with output_session(requested_output, raw_inputs=[requested_input], directory=True):
+        return _render_word(input_path, output_dir, soffice, make_png, dpi, timeout)
+
+
+def _render_word(input_path: Path, output_dir: Path, soffice: str,
+                 make_png: bool, dpi: int, timeout: int) -> dict:
+    """Give external renderers a task-owned copy, never the original DOCX."""
+    session = current_session()
     pdf_path = output_dir / f"{input_path.stem}.pdf"
-    # A unique profile isolates the conversion from an already open LibreOffice.
-    # This helper intentionally inherits, and never rewrites, the font environment.
-    with tempfile.TemporaryDirectory(prefix="datalab-lo-") as profile:
-        run_command([
-            soffice, f"-env:UserInstallation={Path(profile).resolve().as_uri()}",
-            "--headless", "--convert-to", "pdf:writer_pdf_Export",
-            "--outdir", str(output_dir), str(input_path),
-        ], timeout)
-    if not pdf_path.is_file() or pdf_path.stat().st_size == 0:
+    source_copy = cache_directory("word-source") / "source.docx"
+    rendered = cache_directory("word-render")
+    profile = cache_directory("libreoffice")
+    safe_write_bytes(source_copy, input_path.read_bytes())
+    session.record_external_writer("LibreOffice conversion of task-owned DOCX copy", session.root)
+    # A task-owned profile isolates conversion from an already open LibreOffice.
+    # Font settings are inherited, while original files are never passed to it.
+    run_command([
+        soffice, f"-env:UserInstallation={profile.resolve().as_uri()}",
+        "--headless", "--convert-to", "pdf:writer_pdf_Export",
+        "--outdir", str(rendered), str(source_copy),
+    ], timeout)
+    session.adopt_tree(rendered)
+    session.adopt_tree(profile)
+    rendered_pdf = rendered / "source.pdf"
+    if not rendered_pdf.is_file() or rendered_pdf.stat().st_size == 0:
         raise RuntimeError("LibreOffice did not produce a PDF. Check the input and installed fonts.")
+    safe_write_bytes(pdf_path, rendered_pdf.read_bytes())
     renderer = None
     if make_png:
         poppler = shutil.which("pdftoppm")
         if poppler:
             renderer = "pdftoppm"
+            session.record_external_writer("pdftoppm page rendering", rendered)
             run_command([poppler, "-png", "-r", str(dpi), str(pdf_path),
-                         str(output_dir / "page")], timeout)
+                         str(rendered / "page")], timeout)
+            session.adopt_tree(rendered)
+            for page in rendered.glob("page-*.png"):
+                safe_write_bytes(output_dir / page.name, page.read_bytes())
         elif importlib.util.find_spec("pymupdf"):
             renderer = "PyMuPDF"
             import pymupdf
 
             with pymupdf.open(pdf_path) as document:
                 for index, page in enumerate(document):
-                    page.get_pixmap(dpi=dpi).save(output_dir / f"page-{index + 1}.png")
+                    safe_write_bytes(output_dir / f"page-{index + 1}.png", page.get_pixmap(dpi=dpi).tobytes("png"))
         else:
             raise RuntimeError(
                 f"PDF retained at {pdf_path}. PNG rendering requires pdftoppm (Poppler) "
@@ -104,11 +125,11 @@ def render_word(input_path: Path, output_dir: Path, soffice: str,
         "input": str(input_path), "pdf": str(pdf_path),
         "pages": [str(page) for page in pages], "png_renderer": renderer,
         "visual_qa": "not_reviewed",
+        "protection": {"mode": "software_guards", "renderer_input": "task_owned_copy",
+                       "os_isolation_verified": False},
         "next_step": "Inspect every rendered page for fonts, clipping, tables, charts and page numbers.",
     }
-    (output_dir / "render.json").write_text(
-        json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8",
-    )
+    safe_write_text(output_dir / "render.json", json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     return result
 
 

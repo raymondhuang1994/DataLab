@@ -7,10 +7,10 @@ by explicitly labelled recursive future predictions; it is not causal inference.
 from __future__ import annotations
 
 import csv
+from io import BytesIO
 import json
 import math
 import re
-import shutil
 import sys
 import warnings
 from pathlib import Path
@@ -20,6 +20,7 @@ import pandas as pd
 
 from .common import file_sha256, json_safe, utc_now, write_json
 from .io import load_frame
+from .safety import cache_directory, current_session, output_session, register_input, safe_open, safe_write_bytes, safe_write_text
 
 
 def _resolve_task(y, task):
@@ -56,11 +57,6 @@ def _parse_times(series):
 
 def _identifier_name(name):
     return bool(re.search(r"(^id$|_id$|^id_|uuid|guid|编号|身份证|邮箱|电话|手机|邮编)", str(name), re.I))
-
-
-def _require_empty_output(output):
-    if output.exists() and (not output.is_dir() or any(output.iterdir())):
-        raise ValueError("建模成果目录必须为空；请指定新目录，避免覆盖旧结果。")
 
 
 def _time_split(times, test_size):
@@ -233,8 +229,9 @@ def _preprocessing_audit(model, numeric, categorical):
 
 def _plot_diagnostics(output, y, pred, metrics, task, times):
     import os
-    import tempfile
-    os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "datalab-mpl"))
+    plotting_cache = cache_directory("matplotlib")
+    os.environ["MPLCONFIGDIR"] = str(plotting_cache)
+    current_session().record_external_writer("Matplotlib font cache", plotting_cache)
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -270,17 +267,21 @@ def _plot_diagnostics(output, y, pred, metrics, task, times):
             axes[1].axhline(0, color="#888888", linestyle="--")
             axes[1].set(xlabel="Predicted", ylabel="Actual - predicted", title="Holdout residuals")
     path = output / "model_diagnostics.png"
-    fig.savefig(path, dpi=170)
-    plt.close(fig)
+    try:
+        image = BytesIO()
+        fig.savefig(image, format="png", dpi=170)
+        safe_write_bytes(path, image.getvalue())
+    finally:
+        plt.close(fig)
     return path.name
 
 
 def _write_reproduction(output, config):
     """Copy source, not executables/models or data; rerun with an explicit input."""
     destination = output / "code" / "datalab"
-    destination.mkdir(parents=True, exist_ok=True)
     for path in Path(__file__).parent.glob("*.py"):
-        shutil.copy2(path, destination / path.name)
+        register_input(path)
+        safe_write_bytes(destination / path.name, path.read_bytes())
     script = '''"""Reproduce with the same dependency versions in model_metrics.json."""
 import argparse
 import json
@@ -291,6 +292,7 @@ root = Path(__file__).resolve().parent
 sys.path.insert(0, str(root / "code"))
 from datalab.modeling import train_model
 from datalab.common import configure_utf8_stdio
+from datalab.safety import output_session
 
 configure_utf8_stdio()
 
@@ -298,11 +300,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--input", required=True, help="Path to the original data file")
 parser.add_argument("--out", required=True, help="New empty output directory")
 args = parser.parse_args()
-config = json.loads((root / "model_config.json").read_text(encoding="utf-8"))
-result = train_model(args.input, args.out, **config["parameters"])
+with output_session(args.out, inputs=[root / "model_config.json"], raw_inputs=[args.input], directory=True):
+    config = json.loads((root / "model_config.json").read_text(encoding="utf-8"))
+    result = train_model(args.input, args.out, **config["parameters"])
 print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 '''
-    (output / "reproduce.py").write_text(script, encoding="utf-8")
+    safe_write_text(output / "reproduce.py", script, encoding="utf-8")
     write_json(output / "model_config.json", config)
 
 
@@ -316,8 +319,7 @@ def _write_generic_bundle(output, result, source, source_hash, input_rows, input
         rows = json_safe(rows)
         relative = f"tables/{identifier}.csv"
         path = output / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8-sig", newline="") as stream:
+        with safe_open(path, "w", encoding="utf-8-sig", newline="") as stream:
             writer = csv.writer(stream)
             writer.writerow(columns)
             writer.writerows(rows)
@@ -391,6 +393,17 @@ def _write_generic_bundle(output, result, source, source_hash, input_rows, input
 def train_model(input_path, output_dir, target, features=None, task="auto", time_column=None,
                 test_size=0.2, seed=42, model_families=None, cv_folds=5, sheet=None,
                 forecast_lags=None, forecast_horizon=6):
+    """Train into a new task directory while preserving all original inputs."""
+    with output_session(output_dir, raw_inputs=[input_path], directory=True):
+        return _train_model_impl(input_path, output_dir, target, features=features, task=task,
+                                 time_column=time_column, test_size=test_size, seed=seed,
+                                 cv_folds=cv_folds, model_families=model_families, sheet=sheet,
+                                 forecast_lags=forecast_lags, forecast_horizon=forecast_horizon)
+
+
+def _train_model_impl(input_path, output_dir, target, features=None, task="auto", time_column=None,
+                test_size=0.2, seed=42, model_families=None, cv_folds=5, sheet=None,
+                forecast_lags=None, forecast_horizon=6):
     """Compare baseline, linear/logistic and forests using TRAIN-only CV.
 
     Selection uses RMSE (regression) or macro F1 (classification); the holdout
@@ -420,7 +433,6 @@ def train_model(input_path, output_dir, target, features=None, task="auto", time
     source = Path(input_path).expanduser().resolve()
     if source.is_relative_to(output):
         raise ValueError("建模成果目录不能包含输入文件；请把输入与输出放在不同目录。")
-    _require_empty_output(output)
     source_hash = file_sha256(source)
     data = load_frame(source, sheet=sheet)
     if file_sha256(source) != source_hash:
@@ -614,10 +626,8 @@ def train_model(input_path, output_dir, target, features=None, task="auto", time
               "holdout_metrics": metrics, "baseline_holdout_metrics": baseline_metrics,
               "preprocessing": _preprocessing_audit(fitted, numeric, categorical),
               "warnings": list(dict.fromkeys(notes + captured_warnings)), "candidates": comparisons}
-    # Training may take minutes. Recheck before writing, so files introduced
-    # since the initial check are preserved rather than overwritten.
-    _require_empty_output(output)
-    output.mkdir(parents=True, exist_ok=True)
+    # Every artifact is published through the task's exclusive writer. Files
+    # introduced by another process during training cannot be overwritten.
     prediction_table = pd.DataFrame({"source_row_zero_based": positions[test], "actual": y_test,
                                      "prediction": predictions, "baseline_prediction": baseline_predictions})
     if t_test is not None:
@@ -626,12 +636,14 @@ def train_model(input_path, output_dir, target, features=None, task="auto", time
         for index, label in enumerate(model_classes):
             prediction_table[f"probability_class_{index}"] = probabilities[:, index]
         result["probability_columns"] = {f"probability_class_{i}": label for i, label in enumerate(model_classes)}
-    prediction_table.to_csv(output / "holdout_predictions.csv", index=False, encoding="utf-8-sig")
+    with safe_open(output / "holdout_predictions.csv", "w", encoding="utf-8-sig", newline="") as stream:
+        prediction_table.to_csv(stream, index=False)
     assignments = pd.DataFrame({"source_row_zero_based": positions, "partition": "train"})
     assignments.loc[test, "partition"] = "holdout"
     if times is not None:
         assignments["time_utc"] = times
-    assignments.to_csv(output / "split_assignments.csv", index=False, encoding="utf-8-sig")
+    with safe_open(output / "split_assignments.csv", "w", encoding="utf-8-sig", newline="") as stream:
+        assignments.to_csv(stream, index=False)
     if forecasting:
         future_model = clone(selected).fit(X, y)
         history = list(observed_history)
@@ -644,8 +656,9 @@ def train_model(input_path, output_dir, target, features=None, task="auto", time
             future_predictions.append(value)
             history.append(value)
         dates = pd.date_range(times.iloc[-1], periods=forecast_horizon + 1, freq=frequency)[1:]
-        pd.DataFrame({"time_utc": dates, "prediction": future_predictions,
-                      "baseline_persistence": observed_history[-1]}).to_csv(output / "future_forecast.csv", index=False, encoding="utf-8-sig")
+        with safe_open(output / "future_forecast.csv", "w", encoding="utf-8-sig", newline="") as stream:
+            pd.DataFrame({"time_utc": dates, "prediction": future_predictions,
+                          "baseline_persistence": observed_history[-1]}).to_csv(stream, index=False)
         result["forecast"] = {"frequency": frequency, "lags": lags, "horizon": forecast_horizon,
                               "evaluation": "rolling_one_step_with_observed_history",
                               "future": "recursive_multi_step_without_prediction_intervals",
@@ -671,7 +684,7 @@ def train_model(input_path, output_dir, target, features=None, task="auto", time
                   "```text", "python reproduce.py --input <原始数据文件> --out <新的空目录>", "```", "",
                   "model_config.json 记录数据哈希与参数，code/ 保存运行时 Python 源码。原始数据不自动复制。",
                   "未保存或加载 pickle/joblib 模型文件；通过复现脚本重建模型。", ""])
-    (output / "model_report.md").write_text("\n".join(lines), encoding="utf-8")
+    safe_write_text(output / "model_report.md", "\n".join(lines), encoding="utf-8")
     _write_generic_bundle(output, result, source, source_hash, input_rows, input_columns, sheet)
     return result
 

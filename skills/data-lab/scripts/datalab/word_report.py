@@ -6,15 +6,16 @@ are treated as text, never as HTML or OOXML. Rendering is a separate QA step.
 from __future__ import annotations
 
 import json
+from io import BytesIO
 import math
 import os
 from pathlib import Path
 import re
 import sys
-import tempfile
 import unicodedata
 from typing import Any
 from .common import guard_output_path
+from .safety import bundle_inputs, output_session, safe_write_bytes
 
 
 def _text(value: Any) -> str:
@@ -229,10 +230,31 @@ def _add_table(document: Any, columns: list, rows: list[list], width_mm: float,
 
 
 def export_word(bundle_path: str | Path, output_path: str | Path) -> dict:
-    """Create a DOCX from a schema 1.0 bundle; never claim visual QA happened.
+    """Create a new guarded DOCX; existing reports and inputs remain read-only."""
+    source_path = Path(bundle_path).expanduser().resolve()
+    original = source_path.read_bytes()
+    data = json.loads(original.decode("utf-8-sig"))
+    if not isinstance(data, dict):
+        raise ValueError("result.json 必须是对象。")
+    raw_sources = []
+    source_info = data.get("source", {})
+    if not isinstance(source_info, dict):
+        raise ValueError("source 必须是对象。")
+    source = source_info.get("path")
+    if isinstance(source, str) and source and "://" not in source:
+        raw = Path(source).expanduser()
+        raw_sources.append(raw if raw.is_absolute() else source_path.parent / raw)
+    with output_session(output_path, inputs=bundle_inputs(source_path, data), raw_inputs=raw_sources):
+        if source_path.read_bytes() != original:
+            raise ValueError("Word 输入在读取期间发生变化；请使用稳定快照后重试。")
+        return _export_word(source_path, output_path)
+
+
+def _export_word(bundle_path: str | Path, output_path: str | Path) -> dict:
+    """Create a DOCX from a supported bundle; never claim visual QA happened.
 
     Raises ValueError for malformed/unsafe inputs and FileNotFoundError for absent
-    charts. The destination is atomically replaced only after successful save.
+    charts. Save in memory before the guarded output write.
     """
     from docx import Document
     from docx.enum.section import WD_SECTION_START, WD_ORIENT
@@ -350,14 +372,9 @@ def export_word(bundle_path: str | Path, output_path: str | Path) -> dict:
     if source.get("sha256"):
         document.add_heading("来源记录", level=1)
         document.add_paragraph("SHA256 " + _text(source["sha256"]), style="Caption")
-    output.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(prefix=".datalab-word-", suffix=".docx", dir=output.parent)
-    os.close(fd)
-    try:
-        document.save(temporary)
-        os.replace(temporary, output)
-    finally:
-        Path(temporary).unlink(missing_ok=True)
+    buffer = BytesIO()
+    document.save(buffer)
+    safe_write_bytes(output, buffer.getvalue())
     return {"output": str(output), "format": "docx", "tables": len(bundle.get("tables", [])),
             "charts": len(chart_paths), "fonts": {"latin": latin, "cjk": cjk},
             "visual_qa": "not_run", "warnings": ["已生成可编辑正文和表格；图表以图片嵌入。交付前请在目标环境渲染并检查分页与字体。"]}

@@ -4,7 +4,8 @@ from datalab.validation import validate_bundle
 
 
 def test_evidence_sentence_can_be_inside_narrative_paragraph(tmp_path):
-    source=tmp_path / "data.csv"
+    (tmp_path / "inputs").mkdir()
+    source=tmp_path / "inputs/data.csv"
     source.write_text("orders,visits\n1,10\n",encoding="utf-8")
     out=tmp_path / "result"
     data=analyze(source,out,metric_definition={"label":"整体率{含测试}","aggregation":"ratio","column":"orders","denominator":"visits","unit":"percent"},charts=False)

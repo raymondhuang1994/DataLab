@@ -24,7 +24,8 @@ RATIO = {'id': 'conversion', 'label': '转化率', 'aggregation': 'ratio', 'colu
 
 
 def source_csv(tmp_path, rows=ROWS):
-    source = tmp_path / '渠道 数据.csv'
+    source = tmp_path / 'inputs' / '渠道 数据.csv'
+    source.parent.mkdir(exist_ok=True)
     pd.DataFrame(rows).to_csv(source, index=False)
     return source
 
@@ -161,7 +162,8 @@ def test_static_registered_definition_full_data_timezone_and_preferences(tmp_pat
 
 
 def test_unsafe_browser_integers_are_rejected_and_ids_can_stay_text(tmp_path):
-    source=tmp_path/'large.json'
+    source = tmp_path / 'inputs' /'large.json'
+    source.parent.mkdir(exist_ok=True)
     source.write_text(json.dumps([{'amount':9007199254740993}]),encoding='utf-8')
     with pytest.raises(ValueError,match='安全整数'):
         build_dashboard(source,tmp_path/'bad.html',metric='amount')
@@ -213,7 +215,8 @@ def test_project_monthly_frequency_matches_offline_and_live_keys(tmp_path):
 @pytest.mark.parametrize('extension', ['csv', 'json', 'parquet'])
 def test_real_file_serialization_preserves_tiny_ratio_for_offline_js(tmp_path, extension):
     from datalab.io import load_frame
-    source = tmp_path / ('tiny.' + extension)
+    source = tmp_path / 'inputs' / ('tiny.' + extension)
+    source.parent.mkdir(exist_ok=True)
     rows = [{'x': 1.4e-15, 'y': 2e-15}]
     if extension == 'csv':
         pd.DataFrame(rows).to_csv(source, index=False)
@@ -235,7 +238,8 @@ def test_real_file_serialization_preserves_tiny_ratio_for_offline_js(tmp_path, e
 @pytest.mark.parametrize('infinity', [float('inf'), float('-inf')])
 def test_actual_numeric_infinity_refused_before_serializing_count(tmp_path, infinity):
     pytest.importorskip('pyarrow')
-    source = tmp_path / 'nonfinite.parquet'
+    source = tmp_path / 'inputs' / 'nonfinite.parquet'
+    source.parent.mkdir(exist_ok=True)
     pd.DataFrame({'x': [1.0, float('nan')]}).to_parquet(source, index=False)
     spec = {'aggregation': 'count_nonmissing', 'column': 'x'}
     store = SourceStore(source, metric_definition=spec)
@@ -254,7 +258,8 @@ def test_actual_numeric_infinity_refused_before_serializing_count(tmp_path, infi
 
 
 def test_infinity_text_and_real_missing_values_keep_count_meaning(tmp_path):
-    source = tmp_path / 'text.json'
+    source = tmp_path / 'inputs' / 'text.json'
+    source.parent.mkdir(exist_ok=True)
     source.write_text(json.dumps([{'x': 'Infinity'}, {'x': '-Infinity'}, {'x': None}]), encoding='utf-8')
     output = tmp_path / 'text.html'
     spec = normalize_metric({'aggregation': 'count_nonmissing', 'column': 'x'})
@@ -266,7 +271,8 @@ def test_infinity_text_and_real_missing_values_keep_count_meaning(tmp_path):
 
 @pytest.mark.parametrize('groups', [[1, '1'], [True, 1], ['(缺失)', None]])
 def test_mixed_or_ambiguous_groups_rejected_and_not_offered_offline(tmp_path, groups):
-    source = tmp_path / 'typed-groups.json'
+    source = tmp_path / 'inputs' / 'typed-groups.json'
+    source.parent.mkdir(exist_ok=True)
     source.write_text(json.dumps([{'segment_id': value, 'channel': 'valid', 'revenue': 10} for value in groups]), encoding='utf-8')
     with pytest.raises(ValueError, match='混合|缺失'):
         build_dashboard(source, tmp_path / 'bad.html', metric='revenue', group='segment_id')
@@ -287,7 +293,8 @@ def test_mixed_or_ambiguous_groups_rejected_and_not_offered_offline(tmp_path, gr
 def test_homogeneous_numeric_group_labels_are_shared_with_report(tmp_path):
     from datalab.grouping import group_labels
     from datalab.io import load_frame
-    source = tmp_path / 'numeric-groups.json'
+    source = tmp_path / 'inputs' / 'numeric-groups.json'
+    source.parent.mkdir(exist_ok=True)
     source.write_text(json.dumps([{'segment_id': 1, 'revenue': 10}, {'segment_id': 1.0, 'revenue': 20}, {'segment_id': None, 'revenue': 7}]), encoding='utf-8')
     output = tmp_path / 'numeric.html'
     build_dashboard(source, output, metric='revenue', group='segment_id')
